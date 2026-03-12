@@ -1,13 +1,10 @@
-
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { DiscordSDK } from '@discord/embedded-app-sdk';
 import { io } from 'socket.io-client';
 import { Play, Pause, Link, Users, Film, Clock, Loader2, X, Volume2, VolumeX, Maximize, Minimize, AlertCircle, Mic, MicOff, MonitorPlay } from 'lucide-react';
 
 const socket = io(window.location.origin);
 
 function App() {
-  const [sdk, setSdk] = useState(null);
   const [authenticated, setAuthenticated] = useState(false);
   const [user, setUser] = useState(null);
   const [isHost, setIsHost] = useState(false);
@@ -23,650 +20,377 @@ function App() {
   const [duration, setDuration] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [sdkLoadError, setSdkLoadError] = useState(false);
   const [participantCount, setParticipantCount] = useState(1);
   const [notification, setNotification] = useState(null);
   const [sessionEnded, setSessionEnded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [guestsMuted, setGuestsMuted] = useState(true); // Guests force muted by default
+  const [guestsMuted, setGuestsMuted] = useState(true);
   const [participants, setParticipants] = useState([]);
   const videoRef = useRef(null);
   const playerRef = useRef(null);
 
-  // Show notification
   const showNotification = useCallback((message, type = 'info') => {
     setNotification({ message, type });
     setTimeout(() => setNotification(null), 5000);
   }, []);
 
-  // Initialize Discord SDK
   useEffect(() => {
-    const initSdk = async () => {
+    const initApp = async () => {
       try {
-        const embeddedSdk = new EmbeddedAppSdk({
-          debug: true,
-          origin: window.location.origin
-        });
-        
-        setSdk(embeddedSdk);
-        
-        // Wait for SDK ready
-        await embeddedSdk.ready();
-        console.log('SDK Ready');
-        
-        // Authorize with Discord
-        const { code } = await embeddedSdk.authorize();
-        
-        // Exchange code for token via our server
+        // Discord SDK check (must be in Discord iframe)
+        if (typeof window.EmbeddedAppSdk === 'undefined') {
+          console.warn('⚠️ Discord SDK not available - Demo mode (not in Discord iframe)');
+          // Fallback demo mode for testing
+          setSdkLoadError(true);
+          setUser({ id: 'demo', username: 'DemoUser' });
+          setAuthenticated(true);
+          setIsLoading(false);
+          showNotification('Demo mode - Open in Discord for full features', 'info');
+          return;
+        }
+
+        // Load Discord SDK
+        const { EmbeddedAppSdk } = await import('@discord/embedded-app-sdk');
+        const sdk = new EmbeddedAppSdk({ debug: true });
+
+        // SDK ready check
+        await sdk.ready();
+        console.log('✅ Discord SDK Ready');
+
+        // Get Discord auth code
+        const { code } = await sdk.authorize();
+        console.log('🔑 Auth code:', code.slice(0, 10) + '...');
+
+        // Exchange for token
         const tokenResponse = await fetch('/api/token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ code })
         });
-        
+
         if (!tokenResponse.ok) {
-          throw new Error('Failed to authenticate with Discord');
+          const err = await tokenResponse.text();
+          throw new Error(`Token exchange failed: ${tokenResponse.status} - ${err}`);
         }
-        
+
         const tokenData = await tokenResponse.json();
-        
+        console.log('✅ Token OK');
+
         // Get user info
         const userResponse = await fetch('/api/user', {
-          headers: { 
-            'Authorization': `Bearer ${tokenData.access_token}` 
-          }
+          headers: { Authorization: `Bearer ${tokenData.access_token}` }
         });
-        
+
         if (!userResponse.ok) {
-          throw new Error('Failed to get user info');
+          throw new Error(`User fetch failed: ${userResponse.status}`);
         }
-        
+
         const userData = await userResponse.json();
+        console.log('👤 Logged in:', userData.username);
+
         setUser(userData);
         setAuthenticated(true);
-        
-        // Get channel info from SDK
-        const channelId = embeddedSdk.channelId;
-        const guildId = embeddedSdk.guildId;
-        
-        // Join the socket room
+        setIsLoading(false);
+
+        // Join socket room (use Discord channelId)
+        const channelId = sdk.channelId;
+        const guildId = sdk.guildId;
         socket.emit('join_channel', {
           channelId,
           guildId,
           userId: userData.id,
           userName: userData.username
         });
-        
-        setIsLoading(false);
+
       } catch (err) {
-        console.error('=== CINEMASYNC INIT ERROR ===');
-        console.error('Full error:', err);
-        console.error('Stack:', err.stack);
-        console.error('SDK status:', sdk ? 'ready' : 'not ready');
-        setError(`Initialization failed: ${err.message}`);
+        console.error('💥 App init FAILED:', err);
+        setError(err.message);
         setIsLoading(false);
       }
     };
-    
-    initSdk();
-    
-    return () => {
-      if (sdk) {
-        sdk.destroy();
-      }
-    };
+
+    initApp();
   }, []);
 
-  // Socket event listeners
+  // Socket listeners (simplified)
   useEffect(() => {
-    socket.on('role_assigned', ({ isHost, hostId, hostName, videoUrl, isPlaying, timestamp, participants }) => {
+    socket.on('role_assigned', ({ isHost, hostId, hostName, videoUrl, isPlaying, timestamp }) => {
       setIsHost(isHost);
       setHostId(hostId);
       setHostName(hostName);
-      console.log('Assigned role:', isHost ? 'Host' : 'Guest');
-      
-      if (videoUrl) {
-        setVideoState({ url: videoUrl, isPlaying, timestamp });
-      }
-      
-      if (participants) {
-        setParticipants(Object.values(participants));
-      }
+      if (videoUrl) setVideoState({ url: videoUrl, isPlaying, timestamp });
+      console.log(`${isHost ? '👑 HOST' : '👥 Guest'}: ${hostName}`);
     });
 
     socket.on('video_state_update', (state) => {
-      console.log('Video state update:', state);
       setVideoState(state);
-      setHostId(state.hostId);
-      setHostName(state.hostName);
-      setGuestsMuted(state.guestsMuted || false);
-      
-      if (videoRef.current && state.url) {
-        // Only sync if difference is significant (>0.5 seconds)
-        if (Math.abs(videoRef.current.currentTime - state.timestamp) > 0.5) {
-          videoRef.current.currentTime = state.timestamp;
-        }
-        
-        if (state.isPlaying && videoRef.current.paused) {
-          videoRef.current.play().catch(console.error);
-        } else if (!state.isPlaying && !videoRef.current.paused) {
-          videoRef.current.pause();
-        }
-      }
+      console.log('📺 Video sync:', state.url ? 'Playing' : 'No video');
     });
 
-    socket.on('became_host', ({ previousHost, videoUrl, isPlaying, timestamp, guestsMuted }) => {
-      setIsHost(true);
-      setVideoState({ url: videoUrl, isPlaying, timestamp });
-      setGuestsMuted(guestsMuted);
-      showNotification(`You are now the host! ${previousHost ? `(${previousHost} left)` : ''}`, 'success');
-      console.log('You became the host!');
+    socket.on('error', (data) => {
+      setError(data.message);
+      showNotification(data.message, 'error');
     });
 
-    socket.on('host_changed', ({ newHostId, newHostName, previousHost }) => {
-      setHostId(newHostId);
-      setHostName(newHostName);
-      if (!isHost) {
-        showNotification(`${newHostName} is now the host`, 'info');
-      }
-    });
+    return () => socket.disconnect();
+  }, []);
 
-    socket.on('session_started', ({ hostId, hostName, participants }) => {
-      setSessionEnded(false);
-      setHostId(hostId);
-      setHostName(hostName);
-      setGuestsMuted(true); // Force mute guests when session starts
-      console.log(`Session started by ${hostName}`);
-    });
-
-    socket.on('session_ended', ({ endedBy, hostName }) => {
-      setSessionEnded(true);
-      setVideoState({ url: null, isPlaying: false, timestamp: 0 });
-      showNotification(`Session ended by ${endedBy === 'host' ? 'host' : 'the previous host'}`, 'error');
-      console.log('Session ended');
-    });
-
-    socket.on('user_joined', ({ userId, userName, isHost, participantCount, participantsList }) => {
-      setParticipantCount(participantCount);
-      if (participantsList) {
-        setParticipants(participantsList);
-      }
-      if (!isHost) {
-        showNotification(`${userName} joined the watch party`, 'info');
-      }
-    });
-
-    socket.on('user_left', ({ userId, userName, participantCount, participantsList }) => {
-      setParticipantCount(participantCount);
-      if (participantsList) {
-        setParticipants(participantsList);
-      }
-    });
-
-    socket.on('participants_update', ({ participants: participantsList }) => {
-      setParticipants(participantsList);
-    });
-
-    socket.on('guests_muted_changed', ({ guestsMuted }) => {
-      setGuestsMuted(guestsMuted);
-      showNotification(guestsMuted ? 'Host muted all guests' : 'Host unmuted guests', 'info');
-    });
-
-    socket.on('error', ({ message }) => {
-      setError(message);
-      showNotification(message, 'error');
-    });
-
-    return () => {
-      socket.off('role_assigned');
-      socket.off('video_state_update');
-      socket.off('became_host');
-      socket.off('host_changed');
-      socket.off('session_started');
-      socket.off('session_ended');
-      socket.off('user_joined');
-      socket.off('user_left');
-      socket.off('participants_update');
-      socket.off('guests_muted_changed');
-      socket.off('error');
-    };
-  }, [isHost, showNotification]);
-
-  // Video event handlers
-  const handleVideoLoad = () => {
+  // Video handlers
+  const handleVideoTimeUpdate = () => {
     if (videoRef.current) {
+      setCurrentTime(videoRef.current.currentTime);
       setDuration(videoRef.current.duration);
     }
   };
 
-  const handleTimeUpdate = () => {
-    if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
-    }
-  };
+  const handlePlay = () => isHost && socket.emit('video_control', {
+    action: 'play',
+    timestamp: videoRef.current?.currentTime || 0
+  });
 
-  const handlePlay = () => {
-    if (isHost && videoState.url) {
-      socket.emit('video_control', {
-        channelId: sdk?.channelId,
-        action: 'play',
-        data: { timestamp: videoRef.current?.currentTime || 0 }
-      });
-    }
-  };
-
-  const handlePause = () => {
-    if (isHost && videoState.url) {
-      socket.emit('video_control', {
-        channelId: sdk?.channelId,
-        action: 'pause',
-        data: { timestamp: videoRef.current?.currentTime || 0 }
-      });
-    }
-  };
+  const handlePause = () => isHost && socket.emit('video_control', {
+    action: 'pause',
+    timestamp: videoRef.current?.currentTime || 0
+  });
 
   const handleSeek = (e) => {
     const time = parseFloat(e.target.value);
-    if (videoRef.current) {
-      videoRef.current.currentTime = time;
-      setCurrentTime(time);
-    }
-    if (isHost) {
-      socket.emit('video_control', {
-        channelId: sdk?.channelId,
-        action: 'seek',
-        data: { timestamp: time }
-      });
-    }
+    if (videoRef.current) videoRef.current.currentTime = time;
+    isHost && socket.emit('video_control', { action: 'seek', timestamp: time });
   };
 
-  const handleSetUrl = (e) => {
-    e.preventDefault();
-    if (!videoUrl.trim()) return;
-    
-    // Basic URL validation
-    const url = videoUrl.trim();
-    if (!url.match(/^https?:\/\/.+\..+/) && !url.match(/^blob:.+/)) {
-      showNotification('Please enter a valid video URL', 'error');
-      return;
-    }
-    
-    socket.emit('video_control', {
-      channelId: sdk?.channelId,
-      action: 'set_url',
-      data: { url }
-    });
-    
-    setVideoUrl('');
+  const formatTime = (secs) => {
+    const m = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
-  const handleEndSession = () => {
-    if (isHost) {
-      socket.emit('end_session', {
-        channelId: sdk?.channelId
-      });
-    }
-  };
-
-  const toggleGuestsMute = () => {
-    if (isHost) {
-      const newMutedState = !guestsMuted;
-      socket.emit('mute_control', {
-        channelId: sdk?.channelId,
-        action: 'toggle_guests',
-        data: { guestsMuted: newMutedState }
-      });
-    }
-  };
-
-  const requestSync = () => {
-    socket.emit('video_control', {
-      channelId: sdk?.channelId,
-      action: 'sync'
-    });
-    showNotification('Sync requested', 'info');
-  };
-
-  const toggleMute = () => {
-    if (videoRef.current) {
-      videoRef.current.muted = !videoRef.current.muted;
-      setIsMuted(videoRef.current.muted);
-    }
-  };
-
-  const toggleFullscreen = () => {
-    if (playerRef.current) {
-      if (!document.fullscreenElement) {
-        playerRef.current.requestFullscreen();
-        setIsFullscreen(true);
-      } else {
-        document.exitFullscreen();
-        setIsFullscreen(false);
-      }
-    }
-  };
-
-  const formatTime = (seconds) => {
-    if (!seconds || !isFinite(seconds)) return '0:00';
-    const mins = Math.floor(seconds / 60);
-    const secs = Math.floor(seconds % 60);
-    return `${mins}:${secs.toString().padStart(2, '0')}`;
-  };
-
-  // Loading state
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-12 h-12 text-purple-500 animate-spin mx-auto mb-4" />
-          <p className="text-gray-400">Initializing CinemaSync...</p>
-        </div>
+  if (isLoading) return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-black flex items-center justify-center">
+      <div className="text-center">
+        <Loader2 className="w-16 h-16 text-blue-500 animate-spin mx-auto mb-6" />
+        <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent mb-2">
+          Initializing CinemaSync...
+        </h1>
+        <p className="text-gray-400">Loading Discord SDK and connecting...</p>
       </div>
-    );
-  }
+    </div>
+  );
 
-  // Error state
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <div className="bg-red-500/20 border border-red-500 rounded-lg p-4 mb-4">
-            <p className="text-red-400">{error}</p>
-          </div>
-          <button 
-            onClick={() => window.location.reload()}
-            className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg"
-          >
-            Retry
-          </button>
-        </div>
+  if (error) return (
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-8">
+      <div className="max-w-md mx-auto text-center">
+        <AlertCircle className="w-20 h-20 text-red-400 mx-auto mb-6" />
+        <h2 className="text-2xl font-bold text-white mb-4">Setup Error</h2>
+        <p className="text-gray-300 mb-6">{error}</p>
+        <button 
+          onClick={() => window.location.reload()}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-xl font-semibold"
+        >
+          🔄 Retry
+        </button>
+        <p className="text-sm text-gray-500 mt-4">
+          Tip: Must use in Discord Activity iframe
+        </p>
       </div>
-    );
-  }
-
-  // Session ended state
-  if (sessionEnded) {
-    return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
-        <div className="text-center max-w-md">
-          <Film className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-white mb-2">Watch Party Ended</h2>
-          <p className="text-gray-400 mb-4">The host has ended this session.</p>
-          <p className="text-gray-500 text-sm">Close this activity and start a new one to watch together again.</p>
-        </div>
-      </div>
-    );
-  }
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* Notification Toast */}
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900/20 to-black text-white">
       {notification && (
-        <div className={`fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2 ${
-          notification.type === 'error' ? 'bg-red-500/90' :
-          notification.type === 'success' ? 'bg-green-500/90' :
-          'bg-blue-500/90'
-        }`}>
+        <div className={`fixed top-6 right-6 z-50 p-4 rounded-2xl shadow-2xl backdrop-blur-sm flex items-center gap-3 text-sm font-medium ${
+          notification.type === 'error' ? 'bg-red-500/90 text-white border-red-400/50' :
+          notification.type === 'success' ? 'bg-emerald-500/90 text-white border-emerald-400/50' : 
+          'bg-blue-500/90 text-white border-blue-400/50'
+        } border`}>
           <AlertCircle className="w-5 h-5" />
-          <span>{notification.message}</span>
+          {notification.message}
         </div>
       )}
 
-      {/* Header */}
-      <header className="bg-gray-800/50 backdrop-blur-sm border-b border-gray-700/50 p-4">
-        <div className="flex items-center justify-between max-w-7xl mx-auto">
+      <header className="backdrop-blur-sm bg-black/30 border-b border-white/10 sticky top-0 z-20 p-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <Film className="w-8 h-8 text-purple-500" />
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              CinemaSync
-            </h1>
-          </div>
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2 bg-gray-800/50 px-3 py-1.5 rounded-full">
-              <Users className="w-4 h-4 text-gray-400" />
-              <span className="text-sm text-gray-300">{participantCount} watching</span>
+            <Film className="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-2xl text-white shadow-lg" />
+            <div>
+              <h1 className="text-2xl font-black bg-gradient-to-r from-white via-purple-200 to-pink-200 bg-clip-text">
+                CinemaSync
+              </h1>
+              <p className="text-xs text-purple-300/70 font-medium">Discord Watch Party</p>
             </div>
-            <div className="flex items-center gap-2 bg-gray-800/50 px-3 py-1.5 rounded-full">
-              <span className="text-sm text-gray-300">
-                {user?.username || 'Loading...'}
-              </span>
-              {isHost && (
-                <span className="bg-purple-500/20 text-purple-400 text-xs px-2 py-0.5 rounded-full font-semibold">
-                  HOST
-                </span>
-              )}
+          </div>
+          <div className="flex items-center gap-4 text-sm">
+            <div className="bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/10">
+              <Users className="w-4 h-4 inline mr-1" />
+              {participantCount} watching
+            </div>
+            <div className="flex items-center gap-2 bg-black/50 px-3 py-1.5 rounded-full backdrop-blur-sm border border-white/10">
+              <span>{user?.username}</span>
+              {isHost && <span className="px-2 py-0.5 bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs font-bold rounded-full">HOST</span>}
             </div>
           </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto p-4">
-        {/* Video URL Input (Host Only) */}
+      <main className="max-w-6xl mx-auto px-4 py-8">
         {isHost && (
-          <div className="mb-6">
-            <form onSubmit={handleSetUrl} className="flex gap-3">
+          <div className="mb-8 bg-black/30 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+            <form onSubmit={(e) => { e.preventDefault(); handleSetUrl(e); }} className="flex gap-4">
               <div className="flex-1 relative">
-                <Link className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
+                <Link className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
                   type="url"
                   value={videoUrl}
                   onChange={(e) => setVideoUrl(e.target.value)}
-                  placeholder="Paste video URL (.mp4, .webm, direct video links)"
-                  className="w-full bg-gray-800/50 border border-gray-700 rounded-lg pl-10 pr-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500"
+                  placeholder="https://your-video.mp4 or YouTube/Vimeo link"
+                  className="w-full bg-black/50 border border-gray-600 rounded-xl pl-12 pr-4 py-4 text-lg placeholder-gray-500 focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
-              <button
-                type="submit"
-                className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors flex items-center gap-2"
-              >
-                <Play className="w-4 h-4" />
-                Load Video
+              <button type="submit" className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 px-8 py-4 rounded-xl font-bold text-lg shadow-lg">
+                ▶️ Play Movie
               </button>
             </form>
-            <p className="text-gray-500 text-sm mt-2">
-              Supported: Direct MP4/WebM links, CDN links, or any direct video URL
-            </p>
+            <p className="text-gray-400 mt-2 text-sm">Direct MP4/WebM links work best for perfect sync</p>
           </div>
         )}
 
-        {/* Host Controls Bar */}
-        {isHost && (
-          <div className="mb-4 flex items-center justify-between bg-gray-800/30 border border-gray-700/30 rounded-lg px-4 py-2">
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-400">
-                Current Host: <span className="text-white font-medium">{hostName}</span>
-              </span>
-              {videoState.url && (
-                <span className={`px-2 py-1 rounded text-xs font-medium ${
-                  videoState.isPlaying ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'
-                }`}>
-                  {videoState.isPlaying ? 'Playing' : 'Paused'}
-                </span>
-              )}
-            </div>
-            <div className="flex items-center gap-2">
-              {/* Mute Guests Button */}
-              <button
-                onClick={toggleGuestsMute}
-                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  guestsMuted 
-                    ? 'bg-red-500/20 text-red-400 hover:bg-red-500/30' 
-                    : 'bg-green-500/20 text-green-400 hover:bg-green-500/30'
-                }`}
-                title={guestsMuted ? 'Unmute all guests' : 'Mute all guests'}
-              >
-                {guestsMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                {guestsMuted ? 'Guests Muted' : 'Guests Unmuted'}
-              </button>
-              
-              {/* End Session Button */}
-              <button
-                onClick={handleEndSession}
-                className="flex items-center gap-2 px-3 py-1.5 bg-red-500/20 text-red-400 rounded-lg text-sm font-medium hover:bg-red-500/30 transition-colors"
-                title="End session for everyone"
-              >
-                <X className="w-4 h-4" />
-                End Session
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Guest Info Bar */}
-        {!isHost && videoState.url && (
-          <div className="mb-4 flex items-center justify-between bg-gray-800/30 border border-gray-700/30 rounded-lg px-4 py-2">
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-gray-400">
-                Host: <span className="text-white font-medium">{hostName}</span>
-              </span>
-              {guestsMuted && (
-                <span className="flex items-center gap-1 px-2 py-1 bg-red-500/20 text-red-400 rounded text-xs font-medium">
-                  <MicOff className="w-3 h-3" />
-                  Muted by host
-                </span>
-              )}
-            </div>
-            <button
-              onClick={requestSync}
-              className="flex items-center gap-2 px-3 py-1.5 bg-gray-700/50 text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-700 transition-colors"
-            >
-              <MonitorPlay className="w-4 h-4" />
-              Request Sync
-            </button>
-          </div>
-        )}
-
-        {/* Video Player */}
-        <div 
-          ref={playerRef}
-          className="relative bg-black rounded-xl overflow-hidden aspect-video mb-4"
-        >
-          {videoState.url ? (
-            <video
-              ref={videoRef}
-              src={videoState.url}
-              className="w-full h-full"
-              onLoadedMetadata={handleVideoLoad}
-              onTimeUpdate={handleTimeUpdate}
-              onPlay={handlePlay}
-              onPause={handlePause}
-              playsInline
-            />
-          ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800/30">
-              <Film className="w-20 h-20 text-gray-600 mb-4" />
-              <p className="text-gray-500 text-lg">
-                {isHost ? 'Enter a video URL above to start' : 'Waiting for host to load a video...'}
-              </p>
-              {!isHost && (
-                <button
-                  onClick={requestSync}
-                  className="mt-4 bg-gray-700 hover:bg-gray-600 text-white px-4 py-2 rounded-lg text-sm"
-                >
-                  Request Sync
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Video Controls */}
         {videoState.url && (
-          <div className="bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-xl p-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => {
-                  if (videoRef.current) {
-                    if (videoState.isPlaying) {
-                      videoRef.current.pause();
-                    } else {
-                      videoRef.current.play();
-                    }
-                  }
-                }}
-                disabled={!isHost}
-                className={`p-3 rounded-full transition-colors ${
-                  isHost 
-                    ? 'bg-purple-600 hover:bg-purple-700 text-white' 
-                    : 'bg-gray-700 text-gray-500 cursor-not-allowed'
-                }`}
-              >
-                {videoState.isPlaying ? (
-                  <Pause className="w-5 h-5" />
-                ) : (
-                  <Play className="w-5 h-5" />
-                )}
-              </button>
-              
-              <div className="flex-1 flex items-center gap-3">
-                <span className="text-sm text-gray-400 font-mono w-12">
-                  {formatTime(currentTime)}
-                </span>
-                <input
-                  type="range"
-                  min="0"
-                  max={duration || 100}
-                  value={currentTime}
-                  onChange={handleSeek}
-                  disabled={!isHost}
-                  className={`flex-1 h-2 rounded-lg appearance-none cursor-pointer ${
-                    isHost 
-                      ? 'bg-gray-700 accent-purple-500' 
-                      : 'bg-gray-800 cursor-not-allowed'
-                  }`}
-                />
-                <span className="text-sm text-gray-400 font-mono w-12">
-                  {formatTime(duration)}
-                </span>
-              </div>
+          <div className="mb-8">
+            <div ref={playerRef} className="relative bg-black rounded-2xl overflow-hidden shadow-2xl aspect-video mb-6">
+              <video
+                ref={videoRef}
+                src={videoState.url}
+                className="w-full h-full object-contain"
+                onTimeUpdate={handleVideoTimeUpdate}
+                onPlay={handlePlay}
+                onPause={handlePause}
+                muted={guestsMuted}
+                playsInline
+              />
+              {guestsMuted && !isHost && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                  <div className="text-center text-yellow-400">
+                    <MicOff className="w-12 h-12 mx-auto mb-2" />
+                    <p className="text-lg">Audio muted by host</p>
+                  </div>
+                </div>
+              )}
+            </div>
 
-              {/* Volume Control */}
-              <button
-                onClick={toggleMute}
-                className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                {isMuted ? <VolumeX className="w-5 h-5 text-gray-400" /> : <Volume2 className="w-5 h-5 text-gray-400" />}
-              </button>
-              
-              {/* Fullscreen */}
-              <button
-                onClick={toggleFullscreen}
-                className="p-2 rounded-lg hover:bg-gray-700 transition-colors"
-              >
-                {isFullscreen ? <Minimize className="w-5 h-5 text-gray-400" /> : <Maximize className="w-5 h-5 text-gray-400" />}
-              </button>
-              
-              <div className="flex items-center gap-2 text-sm text-gray-400">
-                <Clock className="w-4 h-4" />
-                <span>
-                  {videoState.isPlaying ? 'Playing' : 'Paused'}
-                </span>
+            <div className="bg-black/30 backdrop-blur-sm border border-white/10 rounded-2xl p-6">
+              <div className="flex items-center gap-6">
+                <button 
+                  onClick={() => videoRef.current && (videoState.isPlaying ? videoRef.current.pause() : videoRef.current.play())}
+                  disabled={!isHost}
+                  className={`p-4 rounded-2xl transition-all shadow-lg ${
+                    isHost 
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:scale-105 text-white shadow-purple-500/50' 
+                      : 'bg-gray-800 text-gray-500 cursor-not-allowed'
+                  }`}
+                >
+                  {videoState.isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+                </button>
+                
+                <div className="flex-1 flex items-center gap-4">
+                  <span className="w-16 text-sm font-mono text-gray-400 min-w-[4rem]">
+                    {formatTime(currentTime)}
+                  </span>
+                  
+                  <input
+                    type="range"
+                    min="0"
+                    max={duration || 100}
+                    value={currentTime}
+                    onChange={handleSeek}
+                    disabled={!isHost}
+                    className={`flex-1 h-2 rounded-full appearance-none cursor-pointer bg-gray-700 ${
+                      isHost ? 'accent-purple-500 hover:accent-purple-400 [&::-webkit-slider-thumb]:bg-purple-500' : 'cursor-not-allowed opacity-50'
+                    }`}
+                  />
+                  
+                  <span className="w-16 text-sm font-mono text-gray-400 min-w-[4rem]">
+                    {formatTime(duration)}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <button 
+                    onClick={toggleMute}
+                    className="p-3 rounded-2xl hover:bg-gray-700 transition-colors"
+                  >
+                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                  </button>
+                  
+                  <button 
+                    onClick={toggleFullscreen}
+                    className="p-3 rounded-2xl hover:bg-gray-700 transition-colors"
+                  >
+                    {isFullscreen ? <Minimize className="w-5 h-5" /> : <Maximize className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Info Panel */}
-        <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div className="bg-gray-800/30 border border-gray-700/30 rounded-xl p-4">
-            <h3 className="text-gray-400 text-sm font-medium mb-2">Your Role</h3>
-            <p className="text-xl font-semibold text-purple-400">
-              {isHost ? 'Host (Control Playback)' : 'Guest (Follow Host)'}
-            </p>
-          </div>
-          <div className="bg-gray-800/30 border border-gray-700/30 rounded-xl p-4">
-            <h3 className="text-gray-400 text-sm font-medium mb-2">Sync Status</h3>
-            <p className="text-xl font-semibold text-green-400">
-              {videoState.url ? 'Connected' : 'Waiting for Video'}
-            </p>
-          </div>
-          <div className="bg-gray-800/30 border border-gray-700/30 rounded-xl p-4">
-            <h3 className="text-gray-400 text-sm font-medium mb-2">Instructions</h3>
-            <p className="text-sm text-gray-300">
+        {!videoState.url && (
+          <div className="text-center py-20">
+            <Film className="w-24 h-24 text-gray-600 mx-auto mb-8" />
+            <h2 className="text-3xl font-black text-white mb-4">No Video Loaded</h2>
+            <p className="text-xl text-gray-400 mb-8 max-w-md mx-auto">
               {isHost 
-                ? 'Paste a video URL above to start playback. Your guests will automatically sync. Use the mute button to control guest audio.'
-                : 'Your playback is controlled by the host. Use "Request Sync" if out of sync. The host may mute you during the movie.'
+                ? 'Paste a direct MP4/WebM video URL above to start the watch party'
+                : 'Waiting for host to load a movie. Sync starts automatically when video loads.'
+              }
+            </p>
+            {!isHost && (
+              <button 
+                onClick={requestSync}
+                className="bg-gray-700 hover:bg-gray-600 px-8 py-4 rounded-2xl text-lg font-semibold transition-colors"
+              >
+                🔄 Check Sync
+              </button>
+            )}
+          </div>
+        )}
+
+        <div className="grid md:grid-cols-3 gap-6 mt-12">
+          <div className="bg-black/30 backdrop-blur border border-white/10 rounded-2xl p-6">
+            <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-gray-300">
+              <Users className="w-5 h-5" />
+              Your Role
+            </h3>
+            <div className="text-2xl font-black bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text">
+              {isHost ? '👑 Host' : '👥 Guest'}
+            </div>
+            <p className="text-sm text-gray-400 mt-2">
+              {isHost ? 'You control playback and mute' : 'Follow host playback automatically'}
+            </p>
+          </div>
+
+          <div className="bg-black/30 backdrop-blur border border-white/10 rounded-2xl p-6">
+            <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-gray-300">
+              <Clock className="w-5 h-5" />
+              Status
+            </h3>
+            <div className={`text-2xl font-black px-4 py-2 rounded-xl ${
+              videoState.url ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
+            } border`}>
+              {videoState.url ? 'Synced' : 'Waiting...'}
+            </div>
+          </div>
+
+          <div className="bg-black/30 backdrop-blur border border-white/10 rounded-2xl p-6 md:col-span-1">
+            <h3 className="font-bold text-lg mb-3 flex items-center gap-2 text-gray-300">
+              ℹ️ Instructions
+            </h3>
+            <p className="text-sm text-gray-400 leading-relaxed">
+              {isHost 
+                ? '• Load video → Guests auto-sync<br>• Use mute for movie nights<br>• End session when done'
+                : '• Auto-syncs to host<br>• Request sync if laggy<br>• Respect host mute requests'
               }
             </p>
           </div>

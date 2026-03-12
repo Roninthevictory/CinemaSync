@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { EmbeddedAppSdk } from '@discord/embedded-app-sdk';
+import { DiscordSDK } from '@discord/embedded-app-sdk';
 import { io } from 'socket.io-client';
 import { Play, Pause, Link, Users, Film, Clock, Loader2, X, Volume2, VolumeX, Maximize, Minimize, AlertCircle, Mic, MicOff, MonitorPlay } from 'lucide-react';
 

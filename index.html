@@ -4,114 +4,437 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CinemaSync | Under Dev</title>
+    <!-- Pointing to your local file -->
     <script src="discord-sdk.js"></script>
     
     <style>
         :root {
             --blurple: #5865F2;
-            --bg-dark: #1E1F22;
-            --card-bg: #2B2D31;
+            --blurple-hover: #4752C4;
+            --bg-overlay: rgba(30, 31, 34, 0.4);
+            --card-bg: rgba(255, 255, 255, 0.07);
+            --card-border: rgba(255, 255, 255, 0.12);
             --text-main: #FFFFFF;
-            --text-muted: #B5BAC1;
+            --text-muted: #DBDEE1;
+            --success: #23A55A;
+            --warning: #FEE75C;
+            --nav-bg: rgba(10, 10, 10, 0.6);
         }
 
-        body {
-            background-color: var(--bg-dark);
-            color: var(--text-main);
-            font-family: 'gg sans', 'Helvetica Neue', Arial, sans-serif;
+        * { box-sizing: border-box; }
+
+        body, html {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: 'gg sans', 'Helvetica Neue', Arial, sans-serif;
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        /* Background Image Setup */
+        .background-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://cdn.discordapp.com/attachments/1444689213638578288/1482018052181725204/Gemini_Generated_Image_d0rtzxd0rtzxd0rt_1.png?ex=69b56c5e&is=69b41ade&hm=1d2049e0aaffbefd184a15dd282549ff7dbd2d2945a3285125ec8e11eafb031f&');
+            background-size: cover;
+            background-position: center;
+            z-index: -2;
+            filter: brightness(0.6);
+            transform: scale(1.05);
+            animation: bgPan 20s infinite alternate ease-in-out;
+        }
+
+        @keyframes bgPan {
+            from { transform: scale(1.05) translate(0, 0); }
+            to { transform: scale(1.1) translate(-1%, -1%); }
+        }
+
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
+            z-index: -1;
+        }
+
+        /* Glass Navigation */
+        .glass-nav {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 600px;
+            height: 56px;
+            background: var(--nav-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--card-border);
+            border-radius: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            animation: navSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes navSlideDown {
+            from { opacity: 0; transform: translate(-50%, -40px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+
+        .nav-logo { font-weight: 800; letter-spacing: -0.5px; font-size: 1.1rem; }
+        .nav-logo span { color: var(--blurple); }
+
+        .nav-tabs { display: flex; gap: 8px; }
+        .nav-tab {
+            padding: 6px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: 0.3s;
+        }
+        .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
+        .nav-tab.active { background: var(--blurple); color: #fff; }
+
+        /* Main Wrapper */
+        .main-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 100vh;
+            width: 100%;
+            height: 100vh;
+            padding: 100px 20px 40px 20px;
+        }
+
+        .content-view {
+            display: none;
+            width: 100%;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+        }
+
+        .content-view.active { display: flex; }
+
+        /* Layout Grid */
+        .content-grid {
+            display: flex;
+            gap: 24px;
+            max-width: 1100px;
+            width: 100%;
+            align-items: stretch;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* Glass Cards */
+        .glass-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
+            border: 1px solid var(--card-border);
+            border-radius: 28px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            padding: 40px;
+            transition: transform 0.4s ease, border 0.4s ease, box-shadow 0.4s ease;
         }
 
         .container {
             text-align: center;
-            background: var(--card-bg);
-            padding: 30px;
-            border-radius: 16px;
-            max-width: 400px;
-            width: 90%;
-            border: 1px solid rgba(255, 255, 255, 0.05);
+            flex: 1;
+            min-width: 320px;
+            max-width: 380px;
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation-delay: 0.1s;
         }
 
-        h1 { font-size: 2.2rem; margin: 0 0 10px 0; }
-        p { color: var(--text-muted); margin-bottom: 25px; font-size: 0.9rem; }
-
-        .btn {
-            background-color: var(--blurple);
-            color: white;
-            text-decoration: none;
-            padding: 16px;
-            display: block;
-            border-radius: 8px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            transition: background 0.2s;
+        .features-card {
+            flex: 1.4;
+            min-width: 320px;
+            max-width: 600px;
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+            animation-delay: 0.3s;
         }
 
-        .btn:hover { background-color: #4752C4; }
+        @keyframes cardEntrance {
+            from { opacity: 0; transform: scale(0.95) translateY(30px); filter: blur(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+        }
 
+        h1 { font-size: 2.2rem; margin: 0 0 8px 0; font-weight: 800; letter-spacing: -1px; }
+        h2 { font-size: 1.1rem; color: var(--blurple); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }
+
+        p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.6; }
+
+        .status-badge {
+            display: inline-block;
+            background: rgba(254, 231, 92, 0.1);
+            color: var(--warning);
+            padding: 6px 14px;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(254, 231, 92, 0.2);
+        }
+
+        /* Features */
+        .feature-item { display: flex; gap: 16px; margin-bottom: 18px; text-align: left; }
+        .feature-icon {
+            width: 44px; height: 44px; background: rgba(255,255,255,0.05);
+            border: 1px solid var(--card-border); border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.2rem; flex-shrink: 0;
+        }
+        .feature-content b { display: block; font-size: 1rem; margin-bottom: 2px; }
+        .feature-content span { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
+
+        /* Discord Copy Box */
         .copy-box {
-            margin-top: 20px;
-            background: #1e1f22;
-            padding: 12px;
-            border-radius: 8px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            border: 1px solid #333;
+            margin-top: 10px; background: rgba(88, 101, 242, 0.1);
+            padding: 20px; border-radius: 20px; cursor: pointer;
+            border: 1px solid rgba(88, 101, 242, 0.2); transition: 0.3s;
+        }
+        .copy-box:hover { background: rgba(88, 101, 242, 0.15); border-color: var(--blurple); transform: translateY(-2px); }
+        .copy-status { font-size: 0.7rem; color: var(--blurple); font-weight: 800; text-transform: uppercase; margin-top: 10px; }
+
+        /* LEGAL SECTION SPECIFICS */
+        .legal-view-container {
+            max-width: 900px; width: 100%; height: 100%; display: flex; flex-direction: column;
+        }
+        
+        .legal-toggle {
+            display: flex; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px;
+            width: fit-content; margin: 0 auto 24px auto; border: 1px solid var(--card-border);
+        }
+        .toggle-btn {
+            padding: 8px 24px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
+            font-weight: 600; color: var(--text-muted); transition: 0.2s;
+        }
+        .toggle-btn.active { background: rgba(255,255,255,0.1); color: #fff; }
+
+        .legal-content-scroll {
+            flex: 1; overflow-y: auto; padding-right: 15px; text-align: left;
+        }
+        .legal-content-scroll::-webkit-scrollbar { width: 6px; }
+        .legal-content-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+
+        .legal-text-section { display: none; }
+        .legal-text-section.active { display: block; animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .legal-text-section h3 { font-size: 1.1rem; color: #fff; margin: 24px 0 12px 0; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; }
+        .legal-text-section p, .legal-text-section li { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px; }
+        .legal-text-section ul { padding-left: 20px; }
+
+        footer {
+            margin-top: 24px; font-size: 0.7rem; color: rgba(255, 255, 255, 0.2);
+            letter-spacing: 2px; text-transform: uppercase;
+        }
+
+        @media (max-width: 768px) {
+            .content-grid { flex-direction: column; align-items: center; overflow-y: auto; }
+            .main-wrapper { padding-top: 80px; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>CinemaSync</h1>
-        <p>This activity is currently under development by RVO INC.</p>
+    <div class="background-layer"></div>
+    <div class="overlay"></div>
 
-        <button id="join-btn" class="btn">Join Discord Server</button>
-
-        <div class="copy-box" id="copy-btn">
-            <code>discord.gg/SJcdkaJXcf</code>
-            <div id="status" style="color: var(--blurple); font-size: 0.6rem; margin-top: 5px; font-weight: bold;">CLICK TO COPY</div>
+    <nav class="glass-nav">
+        <div class="nav-logo">Cinema<span>Sync</span></div>
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="switchTab('home', this)">Home</div>
+            <div class="nav-tab" onclick="switchTab('legal', this)">Legal</div>
         </div>
+    </nav>
+
+    <div class="main-wrapper">
+        
+        <!-- HOME VIEW -->
+        <div id="view-home" class="content-view active">
+            <div class="content-grid">
+                <div class="container glass-card">
+                    <div class="status-badge">Under Development</div>
+                    <h1>Coming Soon</h1>
+                    <p>We are working hard to bring the ultimate theater experience to life. Release ETA is currently unknown, but progress is moving fast!</p>
+                    
+                    <div class="copy-box" id="copy-btn">
+                        <b style="display: block; margin-bottom: 4px; font-size: 0.9rem;">Join Our Discord</b>
+                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 10px;">Get release info & sneak peeks</span>
+                        <code style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 6px 10px; border-radius: 6px; color: var(--blurple);">discord.gg/SJcdkaJXcf</code>
+                        <div id="status" class="copy-status">Click to copy link</div>
+                    </div>
+                    <footer>RVO INC &bull; 2026</footer>
+                </div>
+
+                <div class="features-card glass-card">
+                    <h2>What to Expect</h2>
+                    <div class="feature-item">
+                        <div class="feature-icon">⚡</div>
+                        <div class="feature-content">
+                            <b>Frame-Perfect Sync</b>
+                            <span>Proprietary binary sync engine ensures everyone stays on the exact same frame.</span>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">👑</div>
+                        <div class="feature-content">
+                            <b>Host-Based Controls</b>
+                            <span>Take command of the room with dedicated host tools for playback, seeking, and room settings.</span>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">💬</div>
+                        <div class="feature-content">
+                            <b>In-App Group Chat</b>
+                            <span>Text your group directly within the theater so you never have to leave the movie to chat.</span>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">🔒</div>
+                        <div class="feature-content">
+                            <b>Privacy First</b>
+                            <span>No cloud hosting or file streaming. Playback remains entirely local and private.</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- LEGAL VIEW -->
+        <div id="view-legal" class="content-view">
+            <div class="glass-card legal-view-container">
+                <div class="legal-toggle">
+                    <div class="toggle-btn active" id="btn-tos" onclick="toggleLegal('tos')">Terms of Service</div>
+                    <div class="toggle-btn" id="btn-privacy" onclick="toggleLegal('privacy')">Privacy Policy</div>
+                </div>
+
+                <div class="legal-content-scroll">
+                    <!-- TOS SECTION -->
+                    <div id="text-tos" class="legal-text-section active">
+                        <h2>Terms of Service</h2>
+                        <p>Last Updated: March 2024</p>
+                        
+                        <h3>1. Acceptance of Terms</h3>
+                        <p>By accessing or using CinemaSync, you agree to be bound by these Terms of Service. If you do not agree to all of the terms and conditions, you are prohibited from using the service.</p>
+
+                        <h3>2. Nature of Service</h3>
+                        <p>CinemaSync is a synchronization utility designed to align the local playback of media files across multiple users via the Discord Activity platform. CinemaSync does not host, stream, or provide access to any media content. Users are strictly responsible for providing their own media files.</p>
+
+                        <h3>3. User Responsibilities & Copyright</h3>
+                        <p>You represent and warrant that you own or have the necessary licenses and permissions for any media you synchronize using the service. Use of CinemaSync for the public performance or distribution of copyrighted material without authorization is strictly prohibited.</p>
+                        <ul>
+                            <li>CinemaSync does not circumvent DRM or access-control technologies.</li>
+                            <li>Users must ensure all participants in a session possess a legal copy of the media.</li>
+                            <li>RVO INC is not liable for any copyright infringement committed by users.</li>
+                        </ul>
+
+                        <h3>4. Prohibited Conduct</h3>
+                        <p>You agree not to attempt to reverse engineer, decompile, or disrupt the CinemaSync synchronization engine. Any attempt to bypass Host Controls or manipulate the synchronization packets for malicious purposes will result in a permanent ban from the application.</p>
+
+                        <h3>5. Disclaimer of Warranty</h3>
+                        <p>CinemaSync is provided "as is" and "as available." We make no warranties regarding the stability of the synchronization under high-latency network conditions or the compatibility with all file formats.</p>
+
+                        <h3>6. Limitation of Liability</h3>
+                        <p>In no event shall RVO INC or its developers be liable for any damages arising out of the use or inability to use the service, including but not limited to data loss or legal repercussions from unauthorized media synchronization.</p>
+                    </div>
+
+                    <!-- PRIVACY SECTION -->
+                    <div id="text-privacy" class="legal-text-section">
+                        <h2>Privacy Policy</h2>
+                        <p>Last Updated: March 2024</p>
+
+                        <h3>1. Data We Do Not Collect</h3>
+                        <p>Privacy is our core principle. We want to be clear about what stays on your machine:</p>
+                        <ul>
+                            <li><b>No Video Data:</b> We never see, scan, or upload your video files.</li>
+                            <li><b>No Chat Logs:</b> In-app chats are transient and are not stored on our servers after a session ends.</li>
+                            <li><b>No Personal Information:</b> We do not collect emails, real names, or billing addresses.</li>
+                        </ul>
+
+                        <h3>2. Data We Process</h3>
+                        <p>To facilitate synchronization, we process the following transient data:</p>
+                        <ul>
+                            <li><b>Discord User ID:</b> To identify you within the party.</li>
+                            <li><b>Playback State:</b> Current timestamp (e.g., 01:22:15) and status (Playing/Paused).</li>
+                            <li><b>Session Metadata:</b> Room ID and Host ID to route sync packets correctly.</li>
+                        </ul>
+
+                        <h3>3. Local Storage</h3>
+                        <p>CinemaSync may use your browser's local storage to remember your preferred room settings or UI theme. This data never leaves your device.</p>
+
+                        <h3>4. Third-Party Services</h3>
+                        <p>CinemaSync operates within the Discord Activity environment. Your use of this application is also subject to Discord's Privacy Policy. We have no control over data collected by Discord during your use of their platform.</p>
+
+                        <h3>5. Data Security</h3>
+                        <p>Sync packets are transmitted over secure, encrypted WebSocket connections. Since we do not maintain a permanent database of user playback habits, there is no risk of historical viewing data leaks.</p>
+
+                        <h3>6. Changes to This Policy</h3>
+                        <p>We may update our Privacy Policy from time to time. We will notify users of any changes via our official Discord community.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
+
+    <textarea id="copy-helper" readonly style="position: absolute; left: -9999px;"></textarea>
 
     <script>
         const CLIENT_ID = "1481396281644679259";
         const INVITE = "https://discord.gg/SJcdkaJXcf";
 
+        function switchTab(viewId, el) {
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+
+            document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active'));
+            document.getElementById('view-' + viewId).classList.add('active');
+        }
+
+        function toggleLegal(type) {
+            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.legal-text-section').forEach(s => s.classList.remove('active'));
+
+            document.getElementById('btn-' + type).classList.add('active');
+            document.getElementById('text-' + type).classList.add('active');
+            
+            // Scroll to top of content
+            document.querySelector('.legal-content-scroll').scrollTop = 0;
+        }
+
         async function init() {
-            const btn = document.getElementById('join-btn');
-
-            // Wait a moment for the Proxy to pull the real SDK
-            setTimeout(async () => {
-                const DiscordSDK = window.discordSdk ? window.discordSdk.DiscordSDK : (window.discord ? window.discord.DiscordSDK : null);
-
-                if (DiscordSDK) {
-                    const discordSdk = new DiscordSDK(CLIENT_ID);
-                    try {
-                        await discordSdk.ready();
-                        btn.onclick = () => discordSdk.commands.openExternalLink({ url: INVITE });
-                        console.log("CinemaSync: SDK Mode Active");
-                    } catch (e) {
-                        btn.onclick = () => window.open(INVITE, '_blank');
-                    }
-                } else {
-                    // Fallback if SDK is blocked by Discord CSP
-                    btn.onclick = () => window.open(INVITE, '_blank');
-                    console.log("CinemaSync: Browser Mode Active");
-                }
-            }, 1000);
-
-            // Copy Logic
             document.getElementById('copy-btn').onclick = () => {
-                navigator.clipboard.writeText(INVITE);
-                document.getElementById('status').innerText = "COPIED!";
-                setTimeout(() => { document.getElementById('status').innerText = "CLICK TO COPY"; }, 2000);
+                const status = document.getElementById('status');
+                const helper = document.getElementById('copy-helper');
+                helper.value = INVITE;
+                helper.select();
+                try {
+                    document.execCommand('copy');
+                    status.innerText = "COPIED TO CLIPBOARD!";
+                    status.style.color = "var(--success)";
+                    setTimeout(() => {
+                        status.innerText = "Click to copy link";
+                        status.style.color = "var(--blurple)";
+                    }, 2000);
+                } catch (err) {}
             };
         }
 

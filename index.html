@@ -31,6 +31,7 @@
             font-family: 'gg sans', 'Helvetica Neue', Arial, sans-serif;
             overflow: hidden;
             color: var(--text-main);
+            pointer-events: auto !important;
         }
 
         /* Background Image Setup */
@@ -82,8 +83,9 @@
             align-items: center;
             justify-content: space-between;
             padding: 0 24px;
-            z-index: 1000;
+            z-index: 9999 !important;
             box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            pointer-events: auto !important;
             animation: navSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -99,16 +101,17 @@
         .nav-tab {
             padding: 6px 20px;
             border-radius: 20px;
-            cursor: pointer;
+            cursor: pointer !important;
             font-size: 0.9rem;
             font-weight: 600;
             color: var(--text-muted);
             transition: 0.3s;
+            pointer-events: auto !important;
         }
         .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
         .nav-tab.active { background: var(--blurple); color: #fff; }
 
-        /* Main Wrapper */
+        /* Main Wrapper - Discord iframe fix */
         .main-wrapper {
             display: flex;
             align-items: center;
@@ -116,6 +119,8 @@
             width: 100%;
             height: 100vh;
             padding: 100px 20px 40px 20px;
+            pointer-events: auto !important;
+            z-index: 9999 !important;
         }
 
         .content-view {
@@ -124,6 +129,8 @@
             justify-content: center;
             align-items: center;
             height: 100%;
+            pointer-events: auto !important;
+            z-index: 9999 !important;
         }
 
         .content-view.active { display: flex; }
@@ -139,7 +146,7 @@
             justify-content: center;
         }
 
-        /* Glass Cards */
+        /* Glass Cards - Discord iframe fix */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(30px);
@@ -149,6 +156,8 @@
             box-shadow: 0 25px 60px rgba(0,0,0,0.5);
             padding: 40px;
             transition: transform 0.4s ease, border 0.4s ease, box-shadow 0.4s ease;
+            pointer-events: auto !important;
+            z-index: 9999 !important;
         }
 
         .container {
@@ -206,8 +215,9 @@
         /* Discord Copy Box */
         .copy-box {
             margin-top: 10px; background: rgba(88, 101, 242, 0.1);
-            padding: 20px; border-radius: 20px; cursor: pointer;
+            padding: 20px; border-radius: 20px; cursor: pointer !important;
             border: 1px solid rgba(88, 101, 242, 0.2); transition: 0.3s;
+            pointer-events: auto !important;
         }
         .copy-box:hover { background: rgba(88, 101, 242, 0.15); border-color: var(--blurple); transform: translateY(-2px); }
         .copy-status { font-size: 0.7rem; color: var(--blurple); font-weight: 800; text-transform: uppercase; margin-top: 10px; }
@@ -220,10 +230,12 @@
         .legal-toggle {
             display: flex; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px;
             width: fit-content; margin: 0 auto 24px auto; border: 1px solid var(--card-border);
+            pointer-events: auto !important;
         }
         .toggle-btn {
-            padding: 8px 24px; border-radius: 8px; cursor: pointer; font-size: 0.85rem;
-            font-weight: 600; color: var(--text-muted); transition: 0.2s;
+            padding: 8px 24px; border-radius: 8px; cursor: pointer !important;
+            font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
+            transition: 0.2s; pointer-events: auto !important;
         }
         .toggle-btn.active { background: rgba(255,255,255,0.1); color: #fff; }
 
@@ -249,6 +261,11 @@
         @media (max-width: 768px) {
             .content-grid { flex-direction: column; align-items: center; overflow-y: auto; }
             .main-wrapper { padding-top: 80px; }
+        }
+
+        /* Discord Activity Iframe Click Fix - Ensures navigation/buttons work */
+        .nav-tab, .toggle-btn, .copy-box {
+            cursor: pointer !important;
         }
     </style>
 </head>

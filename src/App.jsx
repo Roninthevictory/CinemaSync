@@ -6,27 +6,17 @@ import {
   Film, Radio, Monitor, Settings
 } from 'lucide-react';
 
-/**
- * FIXED: To resolve the "@discord/embedded-app-sdk" resolution error in the preview 
- * environment, we use the global DiscordSDK variable usually provided via 
- * CDN script in index.html, or define a fallback for development.
- */
 const DiscordSDK = window.DiscordSDK?.DiscordSDK || class {
   constructor() { this.commands = { authorize: async () => ({ code: '' }), authenticate: async () => ({ user: { username: 'User', id: '0' } }) }; this.ready = async () => {}; }
 };
 
 // --- CONFIGURATION ---
-const CLIENT_ID = "1481396281644679259"; 
+const CLIENT_ID = "123456789012345678"; 
 const discordSdk = new DiscordSDK(CLIENT_ID);
 const socket = io();
 
-const ACCENT_CYAN = "#00f2ff";
-const ACCENT_PURPLE = "#9d00ff";
-const ERROR_RED = "#ff4646";
-
 export default function App() {
   const [isReady, setIsReady] = useState(false);
-  const [auth, setAuth] = useState(null);
   const [accessDenied, setAccessDenied] = useState(false);
   const [chatOpen, setChatOpen] = useState(true);
   const [messages, setMessages] = useState([]);
@@ -61,14 +51,14 @@ export default function App() {
           body: JSON.stringify({ code }),
         });
         
-        if (!response.ok) throw new Error("Token exchange failed");
+        if (!response.ok) throw new Error("Auth Token Exchange Failed");
         
         const { access_token } = await response.json();
         const newAuth = await discordSdk.commands.authenticate({ access_token });
-        setAuth(newAuth);
 
+        // UPDATED: Ensure we pass the guildId from the SDK context
         socket.emit('join-room', { 
-          guildId: discordSdk.guildId, 
+          guildId: discordSdk.guildId || "web-preview", 
           user: { 
             username: newAuth.user.username, 
             discordId: newAuth.user.id,
@@ -79,8 +69,8 @@ export default function App() {
         setIsReady(true);
       } catch (error) {
         console.error("Discord initialization failed:", error);
-        // Fallback for local preview if not in Discord client
-        if (window.location.hostname === 'localhost' || window.location.hostname.includes('web-amp')) {
+        // If we're in a browser/preview, bypass the bouncer for testing
+        if (!window.location.href.includes('discord')) {
             setIsReady(true);
         } else {
             setAccessDenied(true);
@@ -303,7 +293,7 @@ function Bouncer() {
         <ShieldAlert size={64} className="text-[#ff4646] mx-auto mb-6" />
         <h2 className="text-3xl font-black tracking-tighter mb-4 text-[#ff4646]">ACCESS DENIED</h2>
         <p className="text-white/60 leading-relaxed mb-8">
-          This sector is restricted. Ensure you are launching from the correct Discord Guild and that the Activity is authorized.
+          This sector is restricted. Ensure you are launching from a Discord Guild.
         </p>
         <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
           <div className="h-full bg-[#ff4646] w-1/3 animate-[shimmer_2s_infinite]"></div>

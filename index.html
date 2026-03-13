@@ -3,98 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CinemaSync | Under Dev</title>
-    <script src="discord-sdk.js" defer></script>
-    <script src="js/discord-app.js" defer></script>
+    <title>DiscoCinema | Sync Movies with Friends</title>
     
     <style>
         :root {
             --blurple: #5865F2;
-            --blurple-hover: #4752C4;
-            --bg-overlay: rgba(30, 31, 34, 0.4);
-            --card-bg: rgba(255, 255, 255, 0.07);
-            --card-border: rgba(255, 255, 255, 0.12);
-            --text-main: #FFFFFF;
-            --text-muted: #DBDEE1;
-            --success: #23A55A;
-            --warning: #FEE75C;
-            --nav-bg: rgba(10, 10, 10, 0.6);
+            --blurple-glow: rgba(88, 101, 242, 0.6);
+            --dark-bg: rgba(10, 10, 15, 0.95);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.15);
+            --text-primary: #FFFFFF;
+            --text-secondary: #B8BDC5;
+            --success: #00D166;
+            --gradient: linear-gradient(135deg, rgba(88, 101, 242, 0.3), rgba(74, 82, 196, 0.3));
         }
 
-        * { 
-            box-sizing: border-box; 
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
 
         body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
             height: 100%;
-            font-family: 'gg sans', 'Helvetica Neue', Arial, sans-serif;
+            width: 100%;
             overflow: hidden;
-            color: var(--text-main);
-            pointer-events: auto !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            color: var(--text-primary);
+            background: var(--gradient), url('https://cdn.discordapp.com/attachments/1444689213638578288/1482018052181725204/Gemini_Generated_Image_d0rtzxd0rtzxd0rt_1.png?ex=69b56c5e&is=69b41ade&hm=1d2049e0aaffbefd184a15dd282549ff7dbd2d2945a3285125ec8e11eafb031f&') center/cover;
+            background-blend-mode: overlay;
+            filter: brightness(0.7) contrast(1.1);
+            position: relative;
         }
 
-        /* Background */
-        .background-layer {
+        /* Navigation Bar */
+        .navbar {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('https://cdn.discordapp.com/attachments/1444689213638578288/1482018052181725204/Gemini_Generated_Image_d0rtzxd0rtzxd0rt_1.png?ex=69b56c5e&is=69b41ade&hm=1d2049e0aaffbefd184a15dd282549ff7dbd2d2945a3285125ec8e11eafb031f&');
-            background-size: cover;
-            background-position: center;
-            z-index: -2;
-            filter: brightness(0.6);
-            transform: scale(1.05);
-            animation: bgPan 20s infinite alternate ease-in-out;
-        }
-
-        @keyframes bgPan {
-            from { transform: scale(1.05) translate(0, 0); }
-            to { transform: scale(1.1) translate(-1%, -1%); }
-        }
-
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at center, transparent 0%, rgba(0,0,0,0.4) 100%);
-            z-index: -1;
-        }
-
-        /* Navigation - Discord Activity Optimized */
-        .glass-nav {
-            position: fixed !important;
-            top: 10px !important;
+            top: 20px;
             left: 50%;
             transform: translateX(-50%);
-            width: clamp(300px, 90%, 600px);
-            height: 56px;
-            background: var(--nav-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--card-border);
-            border-radius: 100px;
+            background: var(--dark-bg);
+            backdrop-filter: blur(25px);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            padding: 12px 24px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-            z-index: 10000 !important;
+            gap: 16px;
+            z-index: 1000;
             box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            pointer-events: auto !important;
+            min-width: 280px;
+            max-width: 90vw;
         }
 
-        .nav-logo {
-            font-weight: 800;
+        .logo {
+            font-size: 1.4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--blurple), white);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
             letter-spacing: -0.5px;
-            font-size: clamp(1rem, 1.1vw, 1.1rem);
-        }
-        .nav-logo span {
-            color: var(--blurple);
         }
 
         .nav-tabs {
@@ -103,490 +72,663 @@
         }
 
         .nav-tab {
-            padding: 8px 20px;
-            border-radius: 20px;
-            cursor: pointer !important;
-            font-size: 0.9rem;
+            padding: 10px 24px;
+            border-radius: 25px;
+            background: transparent;
+            color: var(--text-secondary);
             font-weight: 600;
-            color: var(--text-muted);
-            transition: all 0.3s ease;
-            pointer-events: auto !important;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border: 1px solid transparent;
             position: relative;
-            z-index: 10001 !important;
-            data-tab: true;
-            user-select: none;
+            overflow: hidden;
         }
+
         .nav-tab:hover {
-            color: white !important;
-            background: rgba(255,255,255,0.1) !important;
+            color: var(--text-primary);
+            background: var(--glass-bg);
+            border-color: var(--glass-border);
+            transform: translateY(-2px);
         }
+
         .nav-tab.active {
-            background: var(--blurple) !important;
-            color: white !important;
+            background: var(--blurple);
+            color: white;
+            box-shadow: 0 4px 20px var(--blurple-glow);
         }
 
         /* Main Content */
-        .main-wrapper {
+        .main-content {
+            min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 100%;
-            height: 100vh;
-            padding: 85px 20px 40px;
-            z-index: 500 !important;
-            pointer-events: auto !important;
+            padding: 120px 24px 40px;
+            position: relative;
+            z-index: 1;
         }
 
-        .content-view {
+        .view {
             display: none;
+            max-width: 1200px;
             width: 100%;
-            max-width: 1100px;
-            gap: 24px;
+            gap: 32px;
             justify-content: center;
-            align-items: stretch;
             flex-wrap: wrap;
-            pointer-events: auto !important;
-            z-index: 501 !important;
-        }
-        .content-view.active {
-            display: flex !important;
         }
 
-        /* Glass Cards */
-        .glass-card {
-            background: var(--card-bg);
-            backdrop-filter: blur(30px);
-            border: 1px solid var(--card-border);
-            border-radius: 28px;
-            padding: 40px;
-            flex: 1;
-            min-width: 320px;
-            max-width: 380px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
-            transition: all 0.4s ease;
-            pointer-events: auto !important;
-        }
-
-        .features-card {
-            flex: 1.4;
-            max-width: 600px;
-        }
-
-        @keyframes cardEntrance {
-            from { 
-                opacity: 0; 
-                transform: scale(0.95) translateY(30px); 
-                filter: blur(10px); 
-            }
-            to { 
-                opacity: 1; 
-                transform: scale(1) translateY(0); 
-                filter: blur(0); 
-            }
-        }
-
-        .glass-card {
-            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-        }
-
-        .features-card {
-            animation-delay: 0.2s;
-        }
-
-        h1 { 
-            font-size: clamp(2rem, 5vw, 2.5rem); 
-            margin: 0 0 12px 0; 
-            font-weight: 900; 
-            letter-spacing: -1px; 
-        }
-
-        h2 { 
-            font-size: 1.1rem; 
-            color: var(--blurple); 
-            margin: 0 0 24px 0; 
-            text-transform: uppercase; 
-            letter-spacing: 2px; 
-        }
-
-        .subtitle { 
-            color: var(--text-muted); 
-            margin-bottom: 32px; 
-            font-size: clamp(0.9rem, 2.5vw, 1rem);
-            line-height: 1.6; 
-        }
-
-        .status-badge {
-            display: inline-block;
-            background: rgba(254, 231, 92, 0.15);
-            color: var(--warning);
-            padding: 6px 16px;
-            border-radius: 100px;
-            font-size: 0.75rem;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 24px;
-            border: 1px solid rgba(254, 231, 92, 0.3);
-        }
-
-        .feature-item {
+        .view.active {
             display: flex;
-            gap: 16px;
-            margin-bottom: 20px;
+            animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(30px);
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 48px;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
+            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            flex: 1;
+            min-width: 340px;
+            max-width: 420px;
+        }
+
+        .glass-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 35px 80px rgba(0,0,0,0.4);
+        }
+
+        .features-card {
+            flex: 1.2;
+            max-width: 600px;
+            padding: 48px 40px;
+        }
+
+        /* Typography */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(254, 231, 92, 0.2);
+            color: #FEE75C;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            border: 1px solid rgba(254, 231, 92, 0.4);
+            margin-bottom: 24px;
+        }
+
+        .status-badge::before {
+            content: '🔥';
+        }
+
+        h1 {
+            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            font-weight: 900;
+            line-height: 1.1;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+        }
+
+        h2 {
+            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+            font-weight: 700;
+            color: var(--blurple);
+            margin-bottom: 32px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .body-text {
+            color: var(--text-secondary);
+            font-size: clamp(1rem, 2.2vw, 1.1rem);
+            line-height: 1.7;
+            margin-bottom: 32px;
+        }
+
+        /* Feature Grid */
+        .features-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .feature {
+            display: flex;
+            gap: 20px;
             align-items: flex-start;
+            padding: 20px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: all 0.3s ease;
+        }
+
+        .feature:hover {
+            background: rgba(255,255,255,0.06);
+            border-color: rgba(255,255,255,0.1);
         }
 
         .feature-icon {
-            width: 48px;
-            height: 48px;
-            background: rgba(255,255,255,0.08);
-            border: 1px solid var(--card-border);
+            width: 56px;
+            height: 56px;
+            background: var(--blurple-glow);
             border-radius: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.4rem;
+            font-size: 1.6rem;
             flex-shrink: 0;
+            box-shadow: 0 4px 20px var(--blurple-glow);
         }
 
-        .feature-content b {
-            display: block;
-            font-size: 1.1rem;
-            margin-bottom: 4px;
+        .feature-content h3 {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
         }
 
-        .feature-content span {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-            line-height: 1.5;
+        .feature-content p {
+            color: var(--text-secondary);
+            line-height: 1.6;
+        }
+
+        /* Discord Button */
+        .discord-cta {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            margin: 32px 0;
+        }
+
+        .discord-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 24px;
+            background: var(--blurple);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            box-shadow: 0 8px 25px var(--blurple-glow);
+            text-decoration: none;
+        }
+
+        .discord-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 35px var(--blurple-glow);
+        }
+
+        .discord-btn::before {
+            content: '➤';
+            font-size: 1.2rem;
         }
 
         .copy-box {
-            background: rgba(88, 101, 242, 0.15);
-            border: 1px solid rgba(88, 101, 242, 0.3);
-            border-radius: 20px;
-            padding: 24px;
+            background: rgba(255,255,255,0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(88,101,242,0.3);
+            border-radius: 16px;
+            padding: 20px;
             cursor: pointer;
             transition: all 0.3s ease;
-            margin: 24px 0;
-            pointer-events: auto !important;
+            margin-top: 16px;
         }
 
         .copy-box:hover {
-            background: rgba(88, 101, 242, 0.25);
-            transform: translateY(-2px);
+            background: rgba(88,101,242,0.15);
             border-color: var(--blurple);
+            transform: translateY(-2px);
         }
 
-        .copy-title {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            display: block;
-        }
-
-        .copy-subtitle {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            display: block;
-        }
-
-        .copy-code {
-            font-family: 'SF Mono', Monaco, monospace;
-            background: rgba(0,0,0,0.4);
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: var(--blurple);
+        .copy-text {
+            font-family: 'SF Mono', monospace;
+            background: rgba(0,0,0,0.5);
+            padding: 12px 16px;
+            border-radius: 12px;
             font-size: 0.95rem;
-            display: block;
+            color: var(--blurple);
             margin-bottom: 12px;
             word-break: break-all;
+            text-align: center;
         }
 
         .copy-status {
-            font-size: 0.75rem;
-            font-weight: 800;
-            color: var(--blurple);
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-align: center;
             text-transform: uppercase;
             letter-spacing: 1px;
+            opacity: 0.9;
         }
 
-        /* Legal */
-        .legal-view-container {
-            max-width: 900px;
+        .footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        /* Legal Page */
+        .legal-container {
+            max-width: 1000px;
             width: 100%;
-            height: 100%;
             display: flex;
             flex-direction: column;
+            height: 100%;
         }
 
-        .legal-toggle {
+        .legal-tabs {
             display: flex;
-            background: rgba(0,0,0,0.3);
-            padding: 4px;
-            border-radius: 16px;
-            width: fit-content;
-            margin: 0 auto 24px auto;
-            border: 1px solid var(--card-border);
-            gap: 2px;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(20px);
+            padding: 8px 16px;
+            border-radius: 25px;
+            border: 1px solid var(--glass-border);
+            margin-bottom: 32px;
+            gap: 8px;
+            align-self: center;
+            max-width: 500px;
         }
 
-        .toggle-btn {
-            padding: 10px 24px;
-            border-radius: 12px;
-            cursor: pointer !important;
-            font-size: 0.9rem;
+        .legal-tab {
+            padding: 12px 28px;
+            border-radius: 20px;
+            cursor: pointer;
             font-weight: 600;
-            color: var(--text-muted);
-            transition: all 0.2s ease;
-            pointer-events: auto !important;
-            user-select: none;
+            font-size: 0.95rem;
+            color: var(--text-secondary);
+            transition: all 0.3s ease;
+            border: 1px solid transparent;
+            flex: 1;
+            text-align: center;
         }
 
-        .toggle-btn.active {
-            background: rgba(255,255,255,0.15);
+        .legal-tab.active {
+            background: var(--blurple);
             color: white;
+            border-color: var(--blurple);
         }
 
-        .legal-content-scroll {
+        .legal-content {
             flex: 1;
             overflow-y: auto;
-            padding-right: 16px;
+            padding-right: 20px;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255,255,255,0.3) transparent;
         }
 
-        .legal-content-scroll::-webkit-scrollbar {
-            width: 6px;
+        .legal-content::-webkit-scrollbar {
+            width: 8px;
         }
 
-        .legal-content-scroll::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.2);
+        .legal-content::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .legal-content::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.3);
             border-radius: 10px;
         }
 
-        .legal-text-section {
+        .legal-section {
             display: none;
+            animation: fadeInContent 0.4s ease;
+            line-height: 1.8;
         }
 
-        .legal-text-section.active {
+        .legal-section.active {
             display: block;
-            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+        @keyframes fadeInContent {
+            from {
+                opacity: 0;
+                transform: translateX(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
 
-        .legal-text-section h2 {
-            margin-bottom: 20px;
-            font-size: 1.6rem;
-        }
-
-        .legal-text-section h3 {
-            font-size: 1.15rem;
-            color: white;
-            margin: 32px 0 16px 0;
-            border-bottom: 1px solid var(--card-border);
-            padding-bottom: 8px;
-        }
-
-        .legal-text-section p, .legal-text-section li {
-            font-size: 0.95rem;
-            color: var(--text-muted);
-            line-height: 1.7;
-            margin-bottom: 16px;
-        }
-
-        .legal-text-section ul {
-            padding-left: 24px;
-        }
-
-        footer {
-            margin-top: 32px;
-            font-size: 0.75rem;
-            color: rgba(255,255,255,0.4);
+        .legal-section h2 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 24px;
             text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1.5px;
+            position: relative;
         }
 
+        .legal-section h2::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: var(--blurple);
+            border-radius: 2px;
+        }
+
+        .legal-section h3 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 40px 0 20px 0;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--glass-border);
+            position: relative;
+        }
+
+        .legal-section p {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            hyphens: auto;
+        }
+
+        .legal-section ul {
+            padding-left: 32px;
+            margin-bottom: 24px;
+        }
+
+        .legal-section li {
+            font-size: 1.05rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            position: relative;
+        }
+
+        .legal-section li::marker {
+            color: var(--blurple);
+            font-weight: 700;
+        }
+
+        .updated {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-bottom: 40px;
+            font-style: italic;
+        }
+
+        /* Responsive */
         @media (max-width: 768px) {
-            .glass-nav {
-                width: 95vw;
-                top: 12px !important;
-                padding: 0 20px;
-            }
-            .main-wrapper {
-                padding: 80px 16px 32px;
-            }
-            .content-grid {
+            .navbar {
+                top: 12px;
+                padding: 10px 20px;
                 flex-direction: column;
-                gap: 20px;
+                gap: 12px;
+                border-radius: 24px;
             }
+
+            .main-content {
+                padding: 140px 16px 32px;
+                flex-direction: column;
+            }
+
             .glass-card {
-                min-width: unset;
-                max-width: unset;
+                min-width: 100%;
+                max-width: 100%;
+                padding: 32px 24px;
             }
+
             .features-card {
                 order: -1;
+                padding: 32px 24px;
+            }
+
+            .legal-tabs {
+                flex-direction: column;
+                max-width: none;
+            }
+
+            .legal-tab {
+                flex: none;
+            }
+        }
+
+        /* Accessibility */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
             }
         }
     </style>
 </head>
-
 <body>
-    <!-- Background Layers -->
-    <div class="background-layer"></div>
-    <div class="overlay"></div>
-
     <!-- Navigation -->
-    <nav class="glass-nav">
-        <div class="nav-logo">
-            Cinema<span>Sync</span>
-        </div>
+    <nav class="navbar">
+        <div class="logo">Disco<span>Cinema</span></div>
         <div class="nav-tabs">
-            <div class="nav-tab active" data-tab="home">
-                Home
-            </div>
-            <div class="nav-tab" data-tab="legal">
-                Legal
-            </div>
+            <button class="nav-tab active" data-view="home">Home</button>
+            <button class="nav-tab" data-view="legal">Legal</button>
         </div>
     </nav>
 
-    <!-- Main Content Wrapper -->
-    <div class="main-wrapper">
+    <main class="main-content">
         <!-- Home View -->
-        <div id="view-home" class="content-view active">
+        <section id="home" class="view active">
             <div class="glass-card">
-                <div class="status-badge">Under Development</div>
-                <h1>Coming Soon</h1>
-                <p class="subtitle">We are working hard to bring the ultimate theater experience to life. Release ETA is currently unknown, but progress is moving fast!</p>
-                
-                <div class="copy-box" id="copy-btn">
-                    <div class="copy-title">Join Our Discord</div>
-                    <div class="copy-subtitle">Get release info & sneak peeks</div>
-                    <code class="copy-code">discord.gg/SJcdkaJXcf</code>
-                    <div class="copy-status" id="copy-status">Click to copy link</div>
+                <div class="status-badge">Coming Soon</div>
+                <h1>DiscoCinema</h1>
+                <p class="body-text">Watch movies perfectly synced with your Discord friends. No streaming, no cloud, completely private - just flawless synchronization.</p>
+
+                <div class="discord-cta">
+                    <a href="https://discord.gg/SJcdkaJXcf" target="_blank" rel="noopener" class="discord-btn">
+                        Join Discord Server
+                    </a>
+                    <div class="copy-box" role="button" tabindex="0" aria-label="Copy invite link">
+                        <div class="copy-text">discord.gg/SJcdkaJXcf</div>
+                        <div class="copy-status" id="copy-status">Click to copy</div>
+                    </div>
                 </div>
-                <footer>RVO INC • 2026</footer>
+
+                <div class="footer">
+                    © 2026 RVO INC. All Rights Reserved.
+                </div>
             </div>
 
             <div class="glass-card features-card">
-                <h2>What to Expect</h2>
-                
-                <div class="feature-item">
-                    <div class="feature-icon">⚡</div>
-                    <div class="feature-content">
-                        <b>Frame-Perfect Sync</b>
-                        <span>Proprietary binary sync engine ensures everyone stays on the exact same frame.</span>
+                <h2>Why DiscoCinema?</h2>
+                <div class="features-grid">
+                    <div class="feature">
+                        <div class="feature-icon">⚡</div>
+                        <div class="feature-content">
+                            <h3>Frame-Perfect Sync</h3>
+                            <p>Advanced binary protocol ensures every participant stays locked on the exact same frame - zero drift.</p>
+                        </div>
                     </div>
-                </div>
-
-                <div class="feature-item">
-                    <div class="feature-icon">👑</div>
-                    <div class="feature-content">
-                        <b>Host-Based Controls</b>
-                        <span>Take command of the room with dedicated host tools for playback, seeking, and room settings.</span>
+                    <div class="feature">
+                        <div class="feature-icon">👑</div>
+                        <div class="feature-content">
+                            <h3>Host Controls</h3>
+                            <p>Full playback authority for room hosts: pause, seek, speed control, and participant management.</p>
+                        </div>
                     </div>
-                </div>
-
-                <div class="feature-item">
-                    <div class="feature-icon">💬</div>
-                    <div class="feature-content">
-                        <b>In-App Group Chat</b>
-                        <span>Text your group directly within the theater so you never have to leave the movie to chat.</span>
+                    <div class="feature">
+                        <div class="feature-icon">💬</div>
+                        <div class="feature-content">
+                            <h3>Live Chat</h3>
+                            <p>In-room text chat keeps everyone connected without leaving the theater experience.</p>
+                        </div>
                     </div>
-                </div>
-
-                <div class="feature-item">
-                    <div class="feature-icon">🔒</div>
-                    <div class="feature-content">
-                        <b>Privacy First</b>
-                        <span>No cloud hosting or file streaming. Playback remains entirely local and private.</span>
+                    <div class="feature">
+                        <div class="feature-icon">🔒</div>
+                        <div class="feature-content">
+                            <h3>Privacy Guaranteed</h3>
+                            <p>Your files never leave your device. No cloud storage, no tracking, no data collection.</p>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- Legal View -->
-        <div id="view-legal" class="content-view">
-            <div class="glass-card legal-view-container">
-                <div class="legal-toggle">
-                    <div class="toggle-btn active" id="btn-tos" data-type="tos">Terms of Service</div>
-                    <div class="toggle-btn" id="btn-privacy" data-type="privacy">Privacy Policy</div>
+        <section id="legal" class="view">
+            <div class="glass-card legal-container">
+                <div class="legal-tabs">
+                    <button class="legal-tab active" data-legal="tos">Terms of Service</button>
+                    <button class="legal-tab" data-legal="privacy">Privacy Policy</button>
                 </div>
-
-                <div class="legal-content-scroll">
+                <div class="legal-content">
                     <!-- Terms of Service -->
-                    <div id="tos-section" class="legal-text-section active">
+                    <div id="tos" class="legal-section active">
+                        <div class="updated">Last Updated: January 2026</div>
+                        
                         <h2>Terms of Service</h2>
-                        <p><em>Last Updated: March 2024</em></p>
                         
                         <h3>1. Acceptance of Terms</h3>
-                        <p>By accessing or using CinemaSync, you agree to be bound by these Terms of Service. If you do not agree to all of the terms and conditions, you are prohibited from using the service.</p>
+                        <p>By using DiscoCinema, you agree to these Terms of Service, our Privacy Policy, and all applicable laws. If you do not agree, please do not use the service.</p>
 
-                        <h3>2. Nature of Service</h3>
-                        <p>CinemaSync is a synchronization utility designed to align the local playback of media files across multiple users via the Discord Activity platform. CinemaSync does not host, stream, or provide access to any media content. Users are strictly responsible for providing their own media files.</p>
+                        <h3>2. Service Description</h3>
+                        <p>DiscoCinema is a synchronization platform that coordinates local media playback across multiple Discord users. We do not host, stream, or store media files. All playback occurs entirely on users' local devices.</p>
 
-                        <h3>3. User Responsibilities & Copyright</h3>
-                        <p>You represent and warrant that you own or have the necessary licenses and permissions for any media you synchronize using the service. Use of CinemaSync for the public performance or distribution of copyrighted material without authorization is strictly prohibited.</p>
+                        <h3>3. User Content & Copyright</h3>
+                        <p>You are solely responsible for all media synchronized through DiscoCinema. You represent that you have legal rights to play all synchronized content with all session participants. DiscoCinema does not verify or validate media ownership.</p>
                         <ul>
-                            <li>CinemaSync does not circumvent DRM or access-control technologies.</li>
-                            <li>Users must ensure all participants in a session possess a legal copy of the media.</li>
-                            <li>RVO INC is not liable for any copyright infringement committed by users.</li>
+                            <li>You must possess legal copies of all synchronized media</li>
+                            <li>Public performance rights required for group viewing</li>
+                            <li>RVO INC disclaims all liability for copyright infringement</li>
+                            <li>We do not circumvent DRM or copy protection systems</li>
                         </ul>
 
-                        <h3>4. Prohibited Conduct</h3>
-                        <p>You agree not to attempt to reverse engineer, decompile, or disrupt the CinemaSync synchronization engine. Any attempt to bypass Host Controls or manipulate the synchronization packets for malicious purposes will result in a permanent ban from the application.</p>
+                        <h3>4. Prohibited Activities</h3>
+                        <p>The following activities are strictly prohibited and may result in immediate termination:</p>
+                        <ul>
+                            <li>Reverse engineering synchronization protocol</li>
+                            <li>Attempting to bypass host controls</li>
+                            <li>Injecting malicious sync packets</li>
+                            <li>Synchronization of illegal or harmful content</li>
+                            <li>Commercial use without express written permission</li>
+                        </ul>
 
-                        <h3>5. Disclaimer of Warranty</h3>
-                        <p>CinemaSync is provided "as is" and "as available." We make no warranties regarding the stability of the synchronization under high-latency network conditions or the compatibility with all file formats.</p>
+                        <h3>5. Account & Usage</h3>
+                        <p>DiscoCinema sessions are tied to Discord accounts. Abusive behavior may result in Discord reporting and session bans. We reserve the right to block problematic users.</p>
 
-                        <h3>6. Limitation of Liability</h3>
-                        <p>In no event shall RVO INC or its developers be liable for any damages arising out of the use or inability to use the service, including but not limited to data loss or legal repercussions from unauthorized media synchronization.</p>
+                        <h3>6. Disclaimers</h3>
+                        <p>DiscoCinema is provided "AS IS" without warranties. Network latency, player compatibility, and sync accuracy depend on your local environment and internet connection.</p>
+
+                        <h3>7. Limitation of Liability</h3>
+                        <p>RVO INC shall not be liable for any indirect, incidental, or consequential damages arising from use of the service, including lost media, network costs, or legal claims from copyrighted material.</p>
+
+                        <h3>8. Termination</h3>
+                        <p>We reserve the right to suspend or terminate access at any time for violations of these terms or at our sole discretion.</p>
+
+                        <h3>9. Governing Law</h3>
+                        <p>These terms are governed by the laws of [Your Jurisdiction].</p>
+
+                        <h3>10. Changes</h3>
+                        <p>We may modify these terms. Continued use constitutes acceptance of changes.</p>
                     </div>
 
                     <!-- Privacy Policy -->
-                    <div id="privacy-section" class="legal-text-section">
+                    <div id="privacy" class="legal-section">
+                        <div class="updated">Last Updated: January 2026</div>
+                        
                         <h2>Privacy Policy</h2>
-                        <p><em>Last Updated: March 2024</em></p>
+                        
+                        <h3>1. Data Collection Philosophy</h3>
+                        <p>DiscoCinema prioritizes user privacy above all. **We collect zero personally identifiable information and zero media data.**</p>
 
-                        <h3>1. Data We Do Not Collect</h3>
-                        <p>Privacy is our core principle. We want to be clear about what stays on your machine:</p>
+                        <h3>2. What We Don't Collect</h3>
                         <ul>
-                            <li><strong>No Video Data:</strong> We never see, scan, or upload your video files.</li>
-                            <li><strong>No Chat Logs:</strong> In-app chats are transient and are not stored on our servers after a session ends.</li>
-                            <li><strong>No Personal Information:</strong> We do not collect emails, real names, or billing addresses.</li>
+                            <li><strong>No video/audio files</strong> - Never uploaded, scanned, or processed</li>
+                            <li><strong>No filenames</strong> - We don't know what you're watching</li>
+                            <li><strong>No user data</strong> - No emails, names, or profiles stored</li>
+                            <li><strong>No chat history</strong> - Session chat is ephemeral</li>
+                            <li><strong>No analytics</strong> - No tracking pixels or behavioral data</li>
                         </ul>
 
-                        <h3>2. Data We Process</h3>
-                        <p>To facilitate synchronization, we process the following transient data:</p>
+                        <h3>3. Sync Data (Ephemeral)</h3>
+                        <p>During active sessions only, we temporarily process:</p>
                         <ul>
-                            <li><strong>Discord User ID:</strong> To identify you within the party.</li>
-                            <li><strong>Playback State:</strong> Current timestamp (e.g., 01:22:15) and status (Playing/Paused).</li>
-                            <li><strong>Session Metadata:</strong> Room ID and Host ID to route sync packets correctly.</li>
+                            <li>Discord User ID (party identification)</li>
+                            <li>Current timestamp (sync position)</li>
+                            <li>Playback state (play/pause/seeking)</li>
+                            <li>Room ID (session routing)</li>
+                        </ul>
+                        <p>This data exists only in RAM during your session and is discarded immediately after.</p>
+
+                        <h3>4. Local Storage</h3>
+                        <p>Your browser may store:</p>
+                        <ul>
+                            <li>UI preferences (dark mode, etc.)</li>
+                            <li>Recent room IDs</li>
+                            <li>Local sync settings</li>
+                        </ul>
+                        <p>This data never leaves your device.</p>
+
+                        <h3>5. Third Parties</h3>
+                        <p>DiscoCinema operates within Discord infrastructure:</p>
+                        <ul>
+                            <li>Discord's Privacy Policy applies to user profiles</li>
+                            <li>Discord servers relay ephemeral sync packets</li>
+                            <li>No third-party trackers or services</li>
                         </ul>
 
-                        <h3>3. Local Storage</h3>
-                        <p>CinemaSync may use your browser's local storage to remember your preferred room settings or UI theme. This data never leaves your device.</p>
+                        <h3>6. Security</h3>
+                        <p>All sync communication uses:</p>
+                        <ul>
+                            <li>WSS (secure WebSocket)</li>
+                            <li>TLS 1.3 encryption</li>
+                            <li>Ephemeral-only data processing</li>
+                            <li>No persistent databases</li>
+                        </ul>
 
-                        <h3>4. Third-Party Services</h3>
-                        <p>CinemaSync operates within the Discord Activity environment. Your use of this application is also subject to Discord's Privacy Policy. We have no control over data collected by Discord during your use of their platform.</p>
+                        <h3>7. Children</h3>
+                        <p>DiscoCinema is not directed to children under 13. Parents should supervise media consumption.</p>
 
-                        <h3>5. Data Security</h3>
-                        <p>Sync packets are transmitted over secure, encrypted WebSocket connections. Since we do not maintain a permanent database of user playback habits, there is no risk of historical viewing data leaks.</p>
+                        <h3>8. International Users</h3>
+                        <p>By using our service, you consent to data processing in accordance with Discord's global infrastructure.</p>
 
-                        <h3>6. Changes to This Policy</h3>
-                        <p>We may update our Privacy Policy from time to time. We will notify users of any changes via our official Discord community.</p>
+                        <h3>9. Changes</h3>
+                        <p>Privacy policy updates will be announced in our Discord server.</p>
+
+                        <h3>10. Contact</h3>
+                        <p>Questions? Join our Discord: discord.gg/SJcdkaJXcf</p>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+        </section>
+    </main>
 
-    <textarea id="copy-helper" readonly style="position: absolute; left: -9999px;"></textarea>
+    <!-- Copy Helper -->
+    <textarea id="copy-helper" readonly aria-hidden="true" style="position: absolute; opacity: 0;"></textarea>
 
     <script src="js/discord-app.js"></script>
 </body>

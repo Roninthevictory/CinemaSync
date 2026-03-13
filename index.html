@@ -379,8 +379,10 @@
         }
 
         .legal-content {
-            flex: 1;
-            overflow-y: auto;
+            flex: 1 1 auto !important;
+            overflow-y: auto !important;
+            height: calc(100vh - 200px) !important;
+            max-height: calc(100vh - 200px) !important;
             padding-right: 20px;
             scrollbar-width: thin;
             scrollbar-color: rgba(255,255,255,0.3) transparent;

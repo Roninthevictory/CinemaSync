@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CinemaSync | Under Dev</title>
-    <!-- Pointing to your local file -->
-    <script src="discord-sdk.js"></script>
+    <script src="discord-sdk.js" defer></script>
+    <script src="js/discord-app.js" defer></script>
     
     <style>
         :root {
@@ -21,7 +21,9 @@
             --nav-bg: rgba(10, 10, 10, 0.6);
         }
 
-        * { box-sizing: border-box; }
+        * { 
+            box-sizing: border-box; 
+        }
 
         body, html {
             margin: 0;
@@ -34,7 +36,7 @@
             pointer-events: auto !important;
         }
 
-        /* Background Image Setup */
+        /* Background */
         .background-layer {
             position: fixed;
             top: 0;
@@ -65,18 +67,16 @@
             z-index: -1;
         }
 
-        /* Glass Navigation - FIXED for Discord iframe */
+        /* Navigation - Discord Activity Optimized */
         .glass-nav {
             position: fixed !important;
             top: 10px !important;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 600px;
+            width: clamp(300px, 90%, 600px);
             height: 56px;
             background: var(--nav-bg);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--card-border);
             border-radius: 100px;
             display: flex;
@@ -84,276 +84,445 @@
             justify-content: space-between;
             padding: 0 24px;
             z-index: 10000 !important;
-            pointer-events: auto !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-            animation: navSlideDown 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-
-        @keyframes navSlideDown {
-            from { opacity: 0; transform: translate(-50%, -40px); }
-            to { opacity: 1; transform: translate(-50%, 0); }
-        }
-
-        .nav-logo { font-weight: 800; letter-spacing: -0.5px; font-size: 1.1rem; }
-        .nav-logo span { color: var(--blurple); }
-
-        .nav-tabs { 
-            display: flex; 
-            gap: 8px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
             pointer-events: auto !important;
         }
+
+        .nav-logo {
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            font-size: clamp(1rem, 1.1vw, 1.1rem);
+        }
+        .nav-logo span {
+            color: var(--blurple);
+        }
+
+        .nav-tabs {
+            display: flex;
+            gap: 8px;
+        }
+
         .nav-tab {
-            padding: 6px 20px;
+            padding: 8px 20px;
             border-radius: 20px;
             cursor: pointer !important;
             font-size: 0.9rem;
             font-weight: 600;
             color: var(--text-muted);
-            transition: 0.3s;
+            transition: all 0.3s ease;
             pointer-events: auto !important;
             position: relative;
             z-index: 10001 !important;
+            data-tab: true;
+            user-select: none;
         }
-        .nav-tab:hover { color: #fff; background: rgba(255,255,255,0.05); }
-        .nav-tab.active { background: var(--blurple); color: #fff; }
+        .nav-tab:hover {
+            color: white !important;
+            background: rgba(255,255,255,0.1) !important;
+        }
+        .nav-tab.active {
+            background: var(--blurple) !important;
+            color: white !important;
+        }
 
-        /* Main Wrapper - Lower z-index below nav */
+        /* Main Content */
         .main-wrapper {
             display: flex;
             align-items: center;
             justify-content: center;
             width: 100%;
             height: 100vh;
-            padding: 90px 20px 40px 20px;
-            pointer-events: auto !important;
+            padding: 85px 20px 40px;
             z-index: 500 !important;
+            pointer-events: auto !important;
         }
 
         .content-view {
             display: none;
             width: 100%;
+            max-width: 1100px;
+            gap: 24px;
             justify-content: center;
-            align-items: center;
-            height: 100%;
+            align-items: stretch;
+            flex-wrap: wrap;
             pointer-events: auto !important;
             z-index: 501 !important;
         }
-
-        .content-view.active { display: flex; }
-
-        /* Layout Grid */
-        .content-grid {
-            display: flex;
-            gap: 24px;
-            max-width: 1100px;
-            width: 100%;
-            align-items: stretch;
-            flex-wrap: wrap;
-            justify-content: center;
+        .content-view.active {
+            display: flex !important;
         }
 
         /* Glass Cards */
         .glass-card {
             background: var(--card-bg);
             backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--card-border);
             border-radius: 28px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
             padding: 40px;
-            transition: transform 0.4s ease, border 0.4s ease, box-shadow 0.4s ease;
-            pointer-events: auto !important;
-        }
-
-        .container {
-            text-align: center;
             flex: 1;
             min-width: 320px;
             max-width: 380px;
-            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-            animation-delay: 0.1s;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.5);
+            transition: all 0.4s ease;
+            pointer-events: auto !important;
         }
 
         .features-card {
             flex: 1.4;
-            min-width: 320px;
             max-width: 600px;
-            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
-            animation-delay: 0.3s;
         }
 
         @keyframes cardEntrance {
-            from { opacity: 0; transform: scale(0.95) translateY(30px); filter: blur(10px); }
-            to { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+            from { 
+                opacity: 0; 
+                transform: scale(0.95) translateY(30px); 
+                filter: blur(10px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: scale(1) translateY(0); 
+                filter: blur(0); 
+            }
         }
 
-        h1 { font-size: 2.2rem; margin: 0 0 8px 0; font-weight: 800; letter-spacing: -1px; }
-        h2 { font-size: 1.1rem; color: var(--blurple); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; }
+        .glass-card {
+            animation: cardEntrance 0.8s cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
 
-        p { color: var(--text-muted); margin-bottom: 24px; font-size: 0.95rem; line-height: 1.6; }
+        .features-card {
+            animation-delay: 0.2s;
+        }
+
+        h1 { 
+            font-size: clamp(2rem, 5vw, 2.5rem); 
+            margin: 0 0 12px 0; 
+            font-weight: 900; 
+            letter-spacing: -1px; 
+        }
+
+        h2 { 
+            font-size: 1.1rem; 
+            color: var(--blurple); 
+            margin: 0 0 24px 0; 
+            text-transform: uppercase; 
+            letter-spacing: 2px; 
+        }
+
+        .subtitle { 
+            color: var(--text-muted); 
+            margin-bottom: 32px; 
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            line-height: 1.6; 
+        }
 
         .status-badge {
             display: inline-block;
-            background: rgba(254, 231, 92, 0.1);
+            background: rgba(254, 231, 92, 0.15);
             color: var(--warning);
-            padding: 6px 14px;
+            padding: 6px 16px;
             border-radius: 100px;
-            font-size: 0.7rem;
+            font-size: 0.75rem;
             font-weight: 800;
             text-transform: uppercase;
             letter-spacing: 1px;
+            margin-bottom: 24px;
+            border: 1px solid rgba(254, 231, 92, 0.3);
+        }
+
+        .feature-item {
+            display: flex;
+            gap: 16px;
             margin-bottom: 20px;
-            border: 1px solid rgba(254, 231, 92, 0.2);
+            align-items: flex-start;
         }
 
-        /* Features */
-        .feature-item { display: flex; gap: 16px; margin-bottom: 18px; text-align: left; }
         .feature-icon {
-            width: 44px; height: 44px; background: rgba(255,255,255,0.05);
-            border: 1px solid var(--card-border); border-radius: 14px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 1.2rem; flex-shrink: 0;
+            width: 48px;
+            height: 48px;
+            background: rgba(255,255,255,0.08);
+            border: 1px solid var(--card-border);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
         }
-        .feature-content b { display: block; font-size: 1rem; margin-bottom: 2px; }
-        .feature-content span { font-size: 0.85rem; color: var(--text-muted); line-height: 1.4; }
 
-        /* Discord Copy Box */
+        .feature-content b {
+            display: block;
+            font-size: 1.1rem;
+            margin-bottom: 4px;
+        }
+
+        .feature-content span {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
         .copy-box {
-            margin-top: 10px; background: rgba(88, 101, 242, 0.1);
-            padding: 20px; border-radius: 20px; cursor: pointer !important;
-            border: 1px solid rgba(88, 101, 242, 0.2); transition: 0.3s;
+            background: rgba(88, 101, 242, 0.15);
+            border: 1px solid rgba(88, 101, 242, 0.3);
+            border-radius: 20px;
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 24px 0;
             pointer-events: auto !important;
         }
-        .copy-box:hover { background: rgba(88, 101, 242, 0.15); border-color: var(--blurple); transform: translateY(-2px); }
-        .copy-status { font-size: 0.7rem; color: var(--blurple); font-weight: 800; text-transform: uppercase; margin-top: 10px; }
 
-        /* LEGAL SECTION SPECIFICS */
+        .copy-box:hover {
+            background: rgba(88, 101, 242, 0.25);
+            transform: translateY(-2px);
+            border-color: var(--blurple);
+        }
+
+        .copy-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            display: block;
+        }
+
+        .copy-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 12px;
+            display: block;
+        }
+
+        .copy-code {
+            font-family: 'SF Mono', Monaco, monospace;
+            background: rgba(0,0,0,0.4);
+            padding: 8px 12px;
+            border-radius: 8px;
+            color: var(--blurple);
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 12px;
+            word-break: break-all;
+        }
+
+        .copy-status {
+            font-size: 0.75rem;
+            font-weight: 800;
+            color: var(--blurple);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Legal */
         .legal-view-container {
-            max-width: 900px; width: 100%; height: 100%; display: flex; flex-direction: column;
+            max-width: 900px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
-        
+
         .legal-toggle {
-            display: flex; background: rgba(0,0,0,0.2); padding: 4px; border-radius: 12px;
-            width: fit-content; margin: 0 auto 24px auto; border: 1px solid var(--card-border);
-            pointer-events: auto !important;
+            display: flex;
+            background: rgba(0,0,0,0.3);
+            padding: 4px;
+            border-radius: 16px;
+            width: fit-content;
+            margin: 0 auto 24px auto;
+            border: 1px solid var(--card-border);
+            gap: 2px;
         }
+
         .toggle-btn {
-            padding: 8px 24px; border-radius: 8px; cursor: pointer !important;
-            font-size: 0.85rem; font-weight: 600; color: var(--text-muted);
-            transition: 0.2s; pointer-events: auto !important;
+            padding: 10px 24px;
+            border-radius: 12px;
+            cursor: pointer !important;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+            pointer-events: auto !important;
+            user-select: none;
         }
-        .toggle-btn.active { background: rgba(255,255,255,0.1); color: #fff; }
+
+        .toggle-btn.active {
+            background: rgba(255,255,255,0.15);
+            color: white;
+        }
 
         .legal-content-scroll {
-            flex: 1; overflow-y: auto; padding-right: 15px; text-align: left;
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 16px;
         }
-        .legal-content-scroll::-webkit-scrollbar { width: 6px; }
-        .legal-content-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
 
-        .legal-text-section { display: none; }
-        .legal-text-section.active { display: block; animation: fadeIn 0.4s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .legal-content-scroll::-webkit-scrollbar {
+            width: 6px;
+        }
 
-        .legal-text-section h3 { font-size: 1.1rem; color: #fff; margin: 24px 0 12px 0; border-bottom: 1px solid var(--card-border); padding-bottom: 8px; }
-        .legal-text-section p, .legal-text-section li { font-size: 0.9rem; color: var(--text-muted); line-height: 1.7; margin-bottom: 16px; }
-        .legal-text-section ul { padding-left: 20px; }
+        .legal-content-scroll::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+        }
+
+        .legal-text-section {
+            display: none;
+        }
+
+        .legal-text-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .legal-text-section h2 {
+            margin-bottom: 20px;
+            font-size: 1.6rem;
+        }
+
+        .legal-text-section h3 {
+            font-size: 1.15rem;
+            color: white;
+            margin: 32px 0 16px 0;
+            border-bottom: 1px solid var(--card-border);
+            padding-bottom: 8px;
+        }
+
+        .legal-text-section p, .legal-text-section li {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            line-height: 1.7;
+            margin-bottom: 16px;
+        }
+
+        .legal-text-section ul {
+            padding-left: 24px;
+        }
 
         footer {
-            margin-top: 24px; font-size: 0.7rem; color: rgba(255, 255, 255, 0.2);
-            letter-spacing: 2px; text-transform: uppercase;
+            margin-top: 32px;
+            font-size: 0.75rem;
+            color: rgba(255,255,255,0.4);
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
         }
 
         @media (max-width: 768px) {
-            .content-grid { flex-direction: column; align-items: center; overflow-y: auto; }
-            .main-wrapper { padding-top: 80px; }
-        }
-
-        /* Discord Activity Ultimate Click Fix */
-        .nav-tab, .toggle-btn, .copy-box {
-            cursor: pointer !important;
-            user-select: none;
+            .glass-nav {
+                width: 95vw;
+                top: 12px !important;
+                padding: 0 20px;
+            }
+            .main-wrapper {
+                padding: 80px 16px 32px;
+            }
+            .content-grid {
+                flex-direction: column;
+                gap: 20px;
+            }
+            .glass-card {
+                min-width: unset;
+                max-width: unset;
+            }
+            .features-card {
+                order: -1;
+            }
         }
     </style>
 </head>
-<body>
 
+<body>
+    <!-- Background Layers -->
     <div class="background-layer"></div>
     <div class="overlay"></div>
 
+    <!-- Navigation -->
     <nav class="glass-nav">
-        <div class="nav-logo">Cinema<span>Sync</span></div>
+        <div class="nav-logo">
+            Cinema<span>Sync</span>
+        </div>
         <div class="nav-tabs">
-            <div class="nav-tab active" onclick="switchTab('home', this)">Home</div>
-            <div class="nav-tab" onclick="switchTab('legal', this)">Legal</div>
+            <div class="nav-tab active" data-tab="home">
+                Home
+            </div>
+            <div class="nav-tab" data-tab="legal">
+                Legal
+            </div>
         </div>
     </nav>
 
+    <!-- Main Content Wrapper -->
     <div class="main-wrapper">
-        
-        <!-- HOME VIEW -->
+        <!-- Home View -->
         <div id="view-home" class="content-view active">
-            <div class="content-grid">
-                <div class="container glass-card">
-                    <div class="status-badge">Under Development</div>
-                    <h1>Coming Soon</h1>
-                    <p>We are working hard to bring the ultimate theater experience to life. Release ETA is currently unknown, but progress is moving fast!</p>
-                    
-                    <div class="copy-box" id="copy-btn">
-                        <b style="display: block; margin-bottom: 4px; font-size: 0.9rem;">Join Our Discord</b>
-                        <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 10px;">Get release info & sneak peeks</span>
-                        <code style="font-family: monospace; background: rgba(0,0,0,0.3); padding: 6px 10px; border-radius: 6px; color: var(--blurple);">discord.gg/SJcdkaJXcf</code>
-                        <div id="status" class="copy-status">Click to copy link</div>
+            <div class="glass-card">
+                <div class="status-badge">Under Development</div>
+                <h1>Coming Soon</h1>
+                <p class="subtitle">We are working hard to bring the ultimate theater experience to life. Release ETA is currently unknown, but progress is moving fast!</p>
+                
+                <div class="copy-box" id="copy-btn">
+                    <div class="copy-title">Join Our Discord</div>
+                    <div class="copy-subtitle">Get release info & sneak peeks</div>
+                    <code class="copy-code">discord.gg/SJcdkaJXcf</code>
+                    <div class="copy-status" id="copy-status">Click to copy link</div>
+                </div>
+                <footer>RVO INC • 2026</footer>
+            </div>
+
+            <div class="glass-card features-card">
+                <h2>What to Expect</h2>
+                
+                <div class="feature-item">
+                    <div class="feature-icon">⚡</div>
+                    <div class="feature-content">
+                        <b>Frame-Perfect Sync</b>
+                        <span>Proprietary binary sync engine ensures everyone stays on the exact same frame.</span>
                     </div>
-                    <footer>RVO INC &bull; 2026</footer>
                 </div>
 
-                <div class="features-card glass-card">
-                    <h2>What to Expect</h2>
-                    <div class="feature-item">
-                        <div class="feature-icon">⚡</div>
-                        <div class="feature-content">
-                            <b>Frame-Perfect Sync</b>
-                            <span>Proprietary binary sync engine ensures everyone stays on the exact same frame.</span>
-                        </div>
+                <div class="feature-item">
+                    <div class="feature-icon">👑</div>
+                    <div class="feature-content">
+                        <b>Host-Based Controls</b>
+                        <span>Take command of the room with dedicated host tools for playback, seeking, and room settings.</span>
                     </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">👑</div>
-                        <div class="feature-content">
-                            <b>Host-Based Controls</b>
-                            <span>Take command of the room with dedicated host tools for playback, seeking, and room settings.</span>
-                        </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">💬</div>
+                    <div class="feature-content">
+                        <b>In-App Group Chat</b>
+                        <span>Text your group directly within the theater so you never have to leave the movie to chat.</span>
                     </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">💬</div>
-                        <div class="feature-content">
-                            <b>In-App Group Chat</b>
-                            <span>Text your group directly within the theater so you never have to leave the movie to chat.</span>
-                        </div>
-                    </div>
-                    <div class="feature-item">
-                        <div class="feature-icon">🔒</div>
-                        <div class="feature-content">
-                            <b>Privacy First</b>
-                            <span>No cloud hosting or file streaming. Playback remains entirely local and private.</span>
-                        </div>
+                </div>
+
+                <div class="feature-item">
+                    <div class="feature-icon">🔒</div>
+                    <div class="feature-content">
+                        <b>Privacy First</b>
+                        <span>No cloud hosting or file streaming. Playback remains entirely local and private.</span>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- LEGAL VIEW -->
+        <!-- Legal View -->
         <div id="view-legal" class="content-view">
             <div class="glass-card legal-view-container">
                 <div class="legal-toggle">
-                    <div class="toggle-btn active" id="btn-tos" onclick="toggleLegal('tos')">Terms of Service</div>
-                    <div class="toggle-btn" id="btn-privacy" onclick="toggleLegal('privacy')">Privacy Policy</div>
+                    <div class="toggle-btn active" id="btn-tos" data-type="tos">Terms of Service</div>
+                    <div class="toggle-btn" id="btn-privacy" data-type="privacy">Privacy Policy</div>
                 </div>
 
                 <div class="legal-content-scroll">
-                    <!-- TOS SECTION -->
-                    <div id="text-tos" class="legal-text-section active">
+                    <!-- Terms of Service -->
+                    <div id="tos-section" class="legal-text-section active">
                         <h2>Terms of Service</h2>
-                        <p>Last Updated: March 2024</p>
+                        <p><em>Last Updated: March 2024</em></p>
                         
                         <h3>1. Acceptance of Terms</h3>
                         <p>By accessing or using CinemaSync, you agree to be bound by these Terms of Service. If you do not agree to all of the terms and conditions, you are prohibited from using the service.</p>
@@ -379,25 +548,25 @@
                         <p>In no event shall RVO INC or its developers be liable for any damages arising out of the use or inability to use the service, including but not limited to data loss or legal repercussions from unauthorized media synchronization.</p>
                     </div>
 
-                    <!-- PRIVACY SECTION -->
-                    <div id="text-privacy" class="legal-text-section">
+                    <!-- Privacy Policy -->
+                    <div id="privacy-section" class="legal-text-section">
                         <h2>Privacy Policy</h2>
-                        <p>Last Updated: March 2024</p>
+                        <p><em>Last Updated: March 2024</em></p>
 
                         <h3>1. Data We Do Not Collect</h3>
                         <p>Privacy is our core principle. We want to be clear about what stays on your machine:</p>
                         <ul>
-                            <li><b>No Video Data:</b> We never see, scan, or upload your video files.</li>
-                            <li><b>No Chat Logs:</b> In-app chats are transient and are not stored on our servers after a session ends.</li>
-                            <li><b>No Personal Information:</b> We do not collect emails, real names, or billing addresses.</li>
+                            <li><strong>No Video Data:</strong> We never see, scan, or upload your video files.</li>
+                            <li><strong>No Chat Logs:</strong> In-app chats are transient and are not stored on our servers after a session ends.</li>
+                            <li><strong>No Personal Information:</strong> We do not collect emails, real names, or billing addresses.</li>
                         </ul>
 
                         <h3>2. Data We Process</h3>
                         <p>To facilitate synchronization, we process the following transient data:</p>
                         <ul>
-                            <li><b>Discord User ID:</b> To identify you within the party.</li>
-                            <li><b>Playback State:</b> Current timestamp (e.g., 01:22:15) and status (Playing/Paused).</li>
-                            <li><b>Session Metadata:</b> Room ID and Host ID to route sync packets correctly.</li>
+                            <li><strong>Discord User ID:</strong> To identify you within the party.</li>
+                            <li><strong>Playback State:</strong> Current timestamp (e.g., 01:22:15) and status (Playing/Paused).</li>
+                            <li><strong>Session Metadata:</strong> Room ID and Host ID to route sync packets correctly.</li>
                         </ul>
 
                         <h3>3. Local Storage</h3>
@@ -415,53 +584,10 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <textarea id="copy-helper" readonly style="position: absolute; left: -9999px;"></textarea>
 
-    <script>
-        const CLIENT_ID = "1481396281644679259";
-        const INVITE = "https://discord.gg/SJcdkaJXcf";
-
-        function switchTab(viewId, el) {
-            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-            el.classList.add('active');
-
-            document.querySelectorAll('.content-view').forEach(v => v.classList.remove('active'));
-            document.getElementById('view-' + viewId).classList.add('active');
-        }
-
-        function toggleLegal(type) {
-            document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
-            document.querySelectorAll('.legal-text-section').forEach(s => s.classList.remove('active'));
-
-            document.getElementById('btn-' + type).classList.add('active');
-            document.getElementById('text-' + type).classList.add('active');
-            
-            // Scroll to top of content
-            document.querySelector('.legal-content-scroll').scrollTop = 0;
-        }
-
-        async function init() {
-            document.getElementById('copy-btn').onclick = () => {
-                const status = document.getElementById('status');
-                const helper = document.getElementById('copy-helper');
-                helper.value = INVITE;
-                helper.select();
-                try {
-                    document.execCommand('copy');
-                    status.innerText = "COPIED TO CLIPBOARD!";
-                    status.style.color = "var(--success)";
-                    setTimeout(() => {
-                        status.innerText = "Click to copy link";
-                        status.style.color = "var(--blurple)";
-                    }, 2000);
-                } catch (err) {}
-            };
-        }
-
-        init();
-    </script>
+    <script src="js/discord-app.js"></script>
 </body>
 </html>

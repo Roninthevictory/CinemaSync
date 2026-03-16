@@ -37,14 +37,16 @@ function handleViewSwitch(viewId, triggerEl) {
 function handleLegalSwitch(legalId, triggerEl) {
     if (!legalId || !triggerEl) return;
 
-    // Update sub-tab buttons
+    // Update sub-tab buttons within the legal view
     document.querySelectorAll('.legal-subtab').forEach(btn => btn.classList.remove('active'));
     triggerEl.classList.add('active');
 
-    // Update displayed legal content
+    // Update displayed legal content sections
     document.querySelectorAll('.legal-section').forEach(sec => sec.classList.remove('active'));
     const target = document.getElementById(legalId);
-    if (target) target.classList.add('active');
+    if (target) {
+        target.classList.add('active');
+    }
 }
 
 /**
@@ -94,25 +96,30 @@ async function copyToClipboard(text, statusId) {
 /**
  * Global Event Delegation
  * Centralized handling for better performance in the Discord Activity environment
+ * This replaces all inline 'onclick' attributes from the HTML.
  */
 document.addEventListener('click', (e) => {
-    // 1. Main Navigation Tabs
-    const navBtn = e.target.closest('.nav-tab:not(.legal-subtab)');
-    if (navBtn && navBtn.dataset.view) {
-        handleViewSwitch(navBtn.dataset.view, navBtn);
+    // 1. Legal Section Sub-tabs (Handle FIRST and stop propagation)
+    const legalBtn = e.target.closest('.legal-subtab');
+    if (legalBtn && legalBtn.dataset.legal) {
+        e.preventDefault();
+        e.stopPropagation(); // Prevents this click from reaching main nav logic
+        handleLegalSwitch(legalBtn.dataset.legal, legalBtn);
         return;
     }
 
-    // 2. Legal Section Sub-tabs
-    const legalBtn = e.target.closest('.legal-subtab');
-    if (legalBtn && legalBtn.dataset.legal) {
-        handleLegalSwitch(legalBtn.dataset.legal, legalBtn);
+    // 2. Main Navigation Tabs (Home / Legal)
+    const navBtn = e.target.closest('.nav-tab:not(.legal-subtab)');
+    if (navBtn && navBtn.dataset.view) {
+        e.preventDefault();
+        handleViewSwitch(navBtn.dataset.view, navBtn);
         return;
     }
 
     // 3. Link Copying (Discord Invite and Legal URLs)
     const copyBox = e.target.closest('.copy-box');
     if (copyBox) {
+        e.preventDefault();
         const id = copyBox.id;
         const statusEl = copyBox.querySelector('.copy-status');
         const statusId = statusEl ? statusEl.id : null;
@@ -130,7 +137,6 @@ document.addEventListener('click', (e) => {
 
 /**
  * Window Resize/Scaling Helper
- * Optional: Can be used to manually adjust layout if CSS clamp isn't enough
  */
 function onResize() {
     // Ensure the body maintains focus for keyboard accessibility

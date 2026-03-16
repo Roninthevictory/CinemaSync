@@ -3,19 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DiscoCinema | Sync Movies with Friends</title>
+    <title>DiscoCinema</title>
     
     <style>
         :root {
             --blurple: #5865F2;
-            --blurple-glow: rgba(88, 101, 242, 0.6);
-            --dark-bg: rgba(10, 10, 15, 0.95);
-            --glass-bg: rgba(255, 255, 255, 0.08);
-            --glass-border: rgba(255, 255, 255, 0.15);
+            --dark-bg: rgba(10, 10, 15, 0.98);
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
             --text-primary: #FFFFFF;
             --text-secondary: #B8BDC5;
-            --success: #00D166;
-            --gradient: linear-gradient(135deg, rgba(88, 101, 242, 0.3), rgba(74, 82, 196, 0.3));
         }
 
         * {
@@ -24,298 +21,247 @@
             box-sizing: border-box;
         }
 
-        body, html {
-            height: 100%;
-            width: 100%;
-            overflow: hidden;
+        html, body {
+            height: 100vh !important;
+            width: 100vw !important;
+            overflow: hidden !important;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: var(--text-primary);
-            background: var(--gradient), url('https://cdn.discordapp.com/attachments/1444689213638578288/1482018052181725204/Gemini_Generated_Image_d0rtzxd0rtzxd0rt_1.png?ex=69b56c5e&is=69b41ade&hm=1d2049e0aaffbefd184a15dd282549ff7dbd2d2945a3285125ec8e11eafb031f&') center/cover;
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.12) 0%, rgba(74, 82, 196, 0.08) 50%, rgba(20,20,30,0.4) 100%), 
+                        url('https://cdn.discordapp.com/attachments/1444689213638578288/1482018052181725204/Gemini_Generated_Image_d0rtzxd0rtzxd0rt_1.png?ex=69b56c5e&is=69b41ade&hm=1d2049e0aaffbefd184a15dd282549ff7dbd2d2945a3285125ec8e11eafb031f&') center/cover;
             background-blend-mode: overlay;
-            filter: brightness(0.7) contrast(1.1);
+            background-attachment: fixed;
+            filter: brightness(1.05) contrast(1.15);
             position: relative;
+            pointer-events: auto !important;
         }
 
-        /* Navigation Bar */
+        /* Nav Bar - Discord Activity Optimized */
         .navbar {
             position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            height: 64px;
             background: var(--dark-bg);
-            backdrop-filter: blur(25px);
+            backdrop-filter: blur(30px);
+            -webkit-backdrop-filter: blur(30px);
             border: 1px solid var(--glass-border);
-            border-radius: 50px;
-            padding: 12px 24px;
+            border-radius: 32px;
             display: flex;
             align-items: center;
-            gap: 16px;
-            z-index: 1000;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-            min-width: 280px;
-            max-width: 90vw;
+            padding: 0 20px;
+            z-index: 10000 !important;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            pointer-events: auto !important;
         }
 
         .logo {
-            font-size: 1.4rem;
+            font-size: 1.3rem;
             font-weight: 900;
-            background: linear-gradient(135deg, var(--blurple), white);
+            background: linear-gradient(135deg, var(--blurple), #fff);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            letter-spacing: -0.5px;
+            letter-spacing: -0.3px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .nav-tabs {
+            flex: 1;
             display: flex;
-            gap: 8px;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-left: 16px;
         }
 
         .nav-tab {
-            padding: 10px 24px;
-            border-radius: 25px;
+            padding: 8px 20px;
+            border-radius: 24px;
             background: transparent;
             color: var(--text-secondary);
-            font-weight: 600;
-            font-size: 0.95rem;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             border: 1px solid transparent;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer !important;
+            transition: all 0.25s ease;
+            pointer-events: auto !important;
             position: relative;
-            overflow: hidden;
+            z-index: 10001 !important;
         }
 
         .nav-tab:hover {
             color: var(--text-primary);
             background: var(--glass-bg);
             border-color: var(--glass-border);
-            transform: translateY(-2px);
         }
 
         .nav-tab.active {
             background: var(--blurple);
-            color: white;
-            box-shadow: 0 4px 20px var(--blurple-glow);
+            color: white !important;
+            box-shadow: 0 4px 16px rgba(88,101,242,0.4);
         }
 
-        /* Main Content */
+        /* Perfect Discord Activity Layout */
         .main-content {
-            min-height: 100vh;
+            height: 100vh !important;
+            width: 100vw !important;
+            padding: 88px 20px 20px !important;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 120px 24px 40px;
+            flex-direction: column;
+            gap: 24px;
+            overflow: hidden;
             position: relative;
             z-index: 1;
+            pointer-events: auto !important;
         }
 
         .view {
             display: none;
-            max-width: 1200px;
+            flex: 1;
+            flex-direction: column;
+            gap: 24px;
             width: 100%;
-            gap: 32px;
-            justify-content: center;
-            flex-wrap: wrap;
+            overflow: hidden;
         }
 
         .view.active {
             display: flex;
-            animation: slideInUp 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            animation: fadeIn 0.4s ease;
         }
 
-        @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(40px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        .glass-card {
+        /* Single Column for Discord Activity */
+        .glass-container {
             background: var(--glass-bg);
-            backdrop-filter: blur(30px);
+            backdrop-filter: blur(35px);
+            -webkit-backdrop-filter: blur(35px);
             border: 1px solid var(--glass-border);
-            border-radius: 32px;
-            padding: 48px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.3);
-            transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 24px;
             flex: 1;
-            min-width: 340px;
-            max-width: 420px;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 32px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            position: relative;
+            pointer-events: auto !important;
         }
 
-        .glass-card:hover {
-            transform: translateY(-8px);
-            box-shadow: 0 35px 80px rgba(0,0,0,0.4);
-        }
-
-        .features-card {
-            flex: 1.2;
-            max-width: 600px;
-            padding: 48px 40px;
-        }
-
-        /* Typography */
+        /* Status Badge */
         .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
+            align-self: center;
             background: rgba(254, 231, 92, 0.2);
             color: #FEE75C;
-            padding: 8px 20px;
+            padding: 8px 24px;
             border-radius: 50px;
             font-size: 0.85rem;
             font-weight: 800;
             letter-spacing: 1.5px;
             text-transform: uppercase;
             border: 1px solid rgba(254, 231, 92, 0.4);
-            margin-bottom: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .status-badge::before {
             content: '🔥';
         }
 
+        /* Hero Section */
+        .hero-section {
+            text-align: center;
+            flex-shrink: 0;
+        }
+
         h1 {
-            font-size: clamp(2.5rem, 6vw, 3.5rem);
+            font-size: clamp(2rem, 8vw, 3rem);
             font-weight: 900;
             line-height: 1.1;
             margin-bottom: 16px;
-            letter-spacing: -1px;
+            letter-spacing: -0.8px;
             background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
             -webkit-background-clip: text;
             background-clip: text;
         }
 
-        h2 {
-            font-size: clamp(1.1rem, 2.5vw, 1.3rem);
-            font-weight: 700;
-            color: var(--blurple);
-            margin-bottom: 32px;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-
         .body-text {
             color: var(--text-secondary);
-            font-size: clamp(1rem, 2.2vw, 1.1rem);
-            line-height: 1.7;
-            margin-bottom: 32px;
-        }
-
-        /* Feature Grid */
-        .features-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        .feature {
-            display: flex;
-            gap: 20px;
-            align-items: flex-start;
-            padding: 20px;
-            border-radius: 20px;
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.3s ease;
-        }
-
-        .feature:hover {
-            background: rgba(255,255,255,0.06);
-            border-color: rgba(255,255,255,0.1);
-        }
-
-        .feature-icon {
-            width: 56px;
-            height: 56px;
-            background: var(--blurple-glow);
-            border-radius: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.6rem;
-            flex-shrink: 0;
-            box-shadow: 0 4px 20px var(--blurple-glow);
-        }
-
-        .feature-content h3 {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-
-        .feature-content p {
-            color: var(--text-secondary);
+            font-size: clamp(1rem, 4vw, 1.15rem);
             line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto;
+            text-align: center;
         }
 
-        /* Discord Button */
+        /* Discord CTA */
         .discord-cta {
             display: flex;
             flex-direction: column;
             gap: 16px;
-            margin: 32px 0;
+            align-items: center;
+            flex-shrink: 0;
         }
 
         .discord-btn {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 16px 24px;
+            padding: 14px 28px;
             background: var(--blurple);
-            color: white;
+            color: white !important;
             border: none;
-            border-radius: 20px;
+            border-radius: 24px;
             font-size: 1rem;
             font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            box-shadow: 0 8px 25px var(--blurple-glow);
-            text-decoration: none;
+            cursor: pointer !important;
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(88,101,242,0.4);
+            text-decoration: none !important;
+            pointer-events: auto !important;
+            white-space: nowrap;
         }
 
         .discord-btn:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 35px var(--blurple-glow);
-        }
-
-        .discord-btn::before {
-            content: '➤';
-            font-size: 1.2rem;
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px rgba(88,101,242,0.5);
         }
 
         .copy-box {
-            background: rgba(255,255,255,0.05);
-            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.08);
             border: 1px solid rgba(88,101,242,0.3);
-            border-radius: 16px;
-            padding: 20px;
-            cursor: pointer;
+            border-radius: 20px;
+            padding: 16px 20px;
+            cursor: pointer !important;
             transition: all 0.3s ease;
-            margin-top: 16px;
+            pointer-events: auto !important;
+            max-width: 300px;
+            width: 100%;
         }
 
         .copy-box:hover {
             background: rgba(88,101,242,0.15);
             border-color: var(--blurple);
-            transform: translateY(-2px);
+            transform: translateY(-1px);
         }
 
         .copy-text {
             font-family: 'SF Mono', monospace;
-            background: rgba(0,0,0,0.5);
-            padding: 12px 16px;
+            background: rgba(0,0,0,0.6);
+            padding: 10px 16px;
             border-radius: 12px;
             font-size: 0.95rem;
             color: var(--blurple);
-            margin-bottom: 12px;
-            word-break: break-all;
             text-align: center;
+            word-break: break-all;
+            margin-bottom: 8px;
         }
 
         .copy-status {
@@ -325,71 +271,119 @@
             text-transform: uppercase;
             letter-spacing: 1px;
             opacity: 0.9;
+            color: var(--blurple);
         }
 
-        .footer {
-            text-align: center;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            letter-spacing: 0.5px;
+        /* Features */
+        .features-section {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 12px;
         }
 
-        /* Legal Page */
-        .legal-container {
-            max-width: 1000px;
-            width: 100%;
+        .features-grid {
             display: flex;
             flex-direction: column;
-            height: 100%;
+            gap: 20px;
+            max-height: 100%;
+        }
+
+        .feature {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            padding: 20px;
+            border-radius: 20px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            transition: all 0.3s ease;
+            cursor: default;
+        }
+
+        .feature:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(255,255,255,0.12);
+        }
+
+        .feature-icon {
+            width: 52px;
+            height: 52px;
+            background: rgba(88,101,242,0.6);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 16px rgba(88,101,242,0.3);
+        }
+
+        .feature-content h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 6px;
+            color: var(--text-primary);
+        }
+
+        .feature-content p {
+            color: var(--text-secondary);
+            line-height: 1.55;
+            font-size: 0.95rem;
+        }
+
+        /* Legal Tab */
+        .legal-container {
+            height: 100vh !important;
+            padding: 32px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            overflow: hidden;
         }
 
         .legal-tabs {
             display: flex;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(20px);
+            gap: 12px;
+            background: var(--dark-bg);
+            backdrop-filter: blur(25px);
             padding: 8px 16px;
-            border-radius: 25px;
+            border-radius: 24px;
             border: 1px solid var(--glass-border);
-            margin-bottom: 32px;
-            gap: 8px;
             align-self: center;
-            max-width: 500px;
+            flex-shrink: 0;
         }
 
         .legal-tab {
-            padding: 12px 28px;
+            flex: 1;
+            padding: 12px 0;
             border-radius: 20px;
-            cursor: pointer;
+            cursor: pointer !important;
             font-weight: 600;
             font-size: 0.95rem;
             color: var(--text-secondary);
-            transition: all 0.3s ease;
+            transition: all 0.25s ease;
             border: 1px solid transparent;
-            flex: 1;
             text-align: center;
+            pointer-events: auto !important;
         }
 
         .legal-tab.active {
             background: var(--blurple);
-            color: white;
+            color: white !important;
             border-color: var(--blurple);
         }
 
         .legal-content {
-            flex: 1 1 auto !important;
+            flex: 1 !important;
             overflow-y: auto !important;
-            height: calc(100vh - 200px) !important;
-            max-height: calc(100vh - 200px) !important;
-            padding-right: 20px;
+            padding-right: 16px;
             scrollbar-width: thin;
             scrollbar-color: rgba(255,255,255,0.3) transparent;
+            pointer-events: auto !important;
         }
 
         .legal-content::-webkit-scrollbar {
-            width: 8px;
+            width: 6px;
         }
 
         .legal-content::-webkit-scrollbar-track {
@@ -398,36 +392,27 @@
 
         .legal-content::-webkit-scrollbar-thumb {
             background: rgba(255,255,255,0.3);
-            border-radius: 10px;
+            border-radius: 6px;
         }
 
         .legal-section {
             display: none;
-            animation: fadeInContent 0.4s ease;
-            line-height: 1.8;
+            line-height: 1.7;
+            animation: fadeIn 0.3s ease;
+            padding-bottom: 20px;
         }
 
         .legal-section.active {
             display: block;
         }
 
-        @keyframes fadeInContent {
-            from {
-                opacity: 0;
-                transform: translateX(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-
         .legal-section h2 {
-            font-size: 2.2rem;
+            font-size: clamp(1.8rem, 7vw, 2.5rem);
             font-weight: 800;
             margin-bottom: 24px;
             text-align: center;
             position: relative;
+            letter-spacing: -0.5px;
         }
 
         .legal-section h2::after {
@@ -436,104 +421,80 @@
             bottom: -12px;
             left: 50%;
             transform: translateX(-50%);
-            width: 80px;
+            width: 60px;
             height: 3px;
             background: var(--blurple);
             border-radius: 2px;
         }
 
         .legal-section h3 {
-            font-size: 1.4rem;
+            font-size: 1.25rem;
             font-weight: 700;
             color: var(--text-primary);
-            margin: 40px 0 20px 0;
-            padding-bottom: 12px;
+            margin: 32px 0 16px 0;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--glass-border);
-            position: relative;
         }
 
-        .legal-section p {
-            font-size: 1.05rem;
+        .legal-section p, .legal-section li {
+            font-size: 1rem;
             color: var(--text-secondary);
-            margin-bottom: 24px;
-            hyphens: auto;
+            margin-bottom: 20px;
+            line-height: 1.65;
         }
 
         .legal-section ul {
-            padding-left: 32px;
-            margin-bottom: 24px;
-        }
-
-        .legal-section li {
-            font-size: 1.05rem;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-            position: relative;
-        }
-
-        .legal-section li::marker {
-            color: var(--blurple);
-            font-weight: 700;
+            padding-left: 28px;
+            margin-bottom: 20px;
         }
 
         .updated {
-            font-size: 0.9rem;
+            font-size: 0.85rem;
             color: var(--text-secondary);
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 32px;
             font-style: italic;
+            opacity: 0.8;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .navbar {
-                top: 12px;
-                padding: 10px 20px;
-                flex-direction: column;
-                gap: 12px;
-                border-radius: 24px;
-            }
-
-            .main-content {
-                padding: 140px 16px 32px;
-                flex-direction: column;
-            }
-
-            .glass-card {
-                min-width: 100%;
-                max-width: 100%;
-                padding: 32px 24px;
-            }
-
-            .features-card {
-                order: -1;
-                padding: 32px 24px;
-            }
-
-            .legal-tabs {
-                flex-direction: column;
-                max-width: none;
-            }
-
-            .legal-tab {
-                flex: none;
-            }
+        .footer {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--glass-border);
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            opacity: 0.7;
+            flex-shrink: 0;
         }
 
-        /* Accessibility */
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
+        /* DISCORD ACTIVITY RESPONSIVE */
+        @media (max-height: 600px) {
+            .navbar { height: 56px; top: 8px; padding: 0 16px; }
+            .main-content { padding: 76px 16px 16px !important; }
+            .glass-container { padding: 24px; }
+            h1 { font-size: clamp(1.8rem, 6vw, 2.5rem); }
+        }
+
+        @media (max-width: 400px) {
+            .nav-tabs { gap: 8px; }
+            .nav-tab { padding: 6px 16px; font-size: 0.85rem; }
+            .glass-container { padding: 20px; border-radius: 20px; }
+        }
+
+        /* Fix Discord iframe pointer events */
+        button, .nav-tab, .copy-box, .legal-tab {
+            pointer-events: auto !important;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .legal-content, .features-section {
+            -webkit-overflow-scrolling: touch;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="logo">Disco<span>Cinema</span></div>
         <div class="nav-tabs">
@@ -545,193 +506,134 @@
     <main class="main-content">
         <!-- Home View -->
         <section id="home" class="view active">
-            <div class="glass-card">
+            <div class="glass-container">
                 <div class="status-badge">Coming Soon</div>
                 <h1>DiscoCinema</h1>
-                <p class="body-text">Watch movies perfectly synced with your Discord friends. No streaming, no cloud, completely private - just flawless synchronization.</p>
-
+                <p class="body-text">Perfect movie sync for Discord. Your files stay local, privacy guaranteed.</p>
+                
                 <div class="discord-cta">
-                    <a href="https://discord.gg/SJcdkaJXcf" target="_blank" rel="noopener" class="discord-btn">
-                        Join Discord Server
+                    <a href="https://discord.gg/SJcdkaJXcf" target="_blank" class="discord-btn">
+                        Join Discord
                     </a>
-                    <div class="copy-box" role="button" tabindex="0" aria-label="Copy invite link">
+                    <div class="copy-box" role="button" tabindex="0" aria-label="Copy invite">
                         <div class="copy-text">discord.gg/SJcdkaJXcf</div>
                         <div class="copy-status" id="copy-status">Click to copy</div>
                     </div>
                 </div>
 
-                <div class="footer">
-                    © 2026 RVO INC. All Rights Reserved.
+                <div class="features-section">
+                    <div class="features-grid">
+                        <div class="feature">
+                            <div class="feature-icon">⚡</div>
+                            <div class="feature-content">
+                                <h3>Frame Perfect</h3>
+                                <p>Binary sync protocol - zero drift, perfect alignment.</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">👑</div>
+                            <div class="feature-content">
+                                <h3>Host Controls</h3>
+                                <p>Full playback authority with participant management.</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">💬</div>
+                            <div class="feature-content">
+                                <h3>Live Chat</h3>
+                                <p>Stay connected without leaving the theater.</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">🔒</div>
+                            <div class="feature-content">
+                                <h3>Private</h3>
+                                <p>No cloud, no tracking. Your data stays yours.</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div class="glass-card features-card">
-                <h2>Why DiscoCinema?</h2>
-                <div class="features-grid">
-                    <div class="feature">
-                        <div class="feature-icon">⚡</div>
-                        <div class="feature-content">
-                            <h3>Frame-Perfect Sync</h3>
-                            <p>Advanced binary protocol ensures every participant stays locked on the exact same frame - zero drift.</p>
-                        </div>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">👑</div>
-                        <div class="feature-content">
-                            <h3>Host Controls</h3>
-                            <p>Full playback authority for room hosts: pause, seek, speed control, and participant management.</p>
-                        </div>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">💬</div>
-                        <div class="feature-content">
-                            <h3>Live Chat</h3>
-                            <p>In-room text chat keeps everyone connected without leaving the theater experience.</p>
-                        </div>
-                    </div>
-                    <div class="feature">
-                        <div class="feature-icon">🔒</div>
-                        <div class="feature-content">
-                            <h3>Privacy Guaranteed</h3>
-                            <p>Your files never leave your device. No cloud storage, no tracking, no data collection.</p>
-                        </div>
-                    </div>
-                </div>
+                <div class="footer">© 2026 RVO INC</div>
             </div>
         </section>
 
         <!-- Legal View -->
         <section id="legal" class="view">
-            <div class="glass-card legal-container">
+            <div class="glass-container legal-container">
                 <div class="legal-tabs">
-                    <button class="legal-tab active" data-legal="tos">Terms of Service</button>
-                    <button class="legal-tab" data-legal="privacy">Privacy Policy</button>
+                    <button class="legal-tab active" data-legal="tos">Terms</button>
+                    <button class="legal-tab" data-legal="privacy">Privacy</button>
                 </div>
+                
                 <div class="legal-content">
-                    <!-- Terms of Service -->
                     <div id="tos" class="legal-section active">
-                        <div class="updated">Last Updated: January 2026</div>
+                        <div class="updated">Updated January 2026</div>
                         
                         <h2>Terms of Service</h2>
                         
-                        <h3>1. Acceptance of Terms</h3>
-                        <p>By using DiscoCinema, you agree to these Terms of Service, our Privacy Policy, and all applicable laws. If you do not agree, please do not use the service.</p>
+                        <h3>1. Acceptance</h3>
+                        <p>Using DiscoCinema means you accept these terms completely.</p>
 
-                        <h3>2. Service Description</h3>
-                        <p>DiscoCinema is a synchronization platform that coordinates local media playback across multiple Discord users. We do not host, stream, or store media files. All playback occurs entirely on users' local devices.</p>
+                        <h3>2. What We Are</h3>
+                        <p>Local media sync tool. No hosting, no streaming, your files only.</p>
 
-                        <h3>3. User Content & Copyright</h3>
-                        <p>You are solely responsible for all media synchronized through DiscoCinema. You represent that you have legal rights to play all synchronized content with all session participants. DiscoCinema does not verify or validate media ownership.</p>
+                        <h3>3. Your Responsibility</h3>
+                        <p>You own all synced content legally. We don't check.</p>
                         <ul>
-                            <li>You must possess legal copies of all synchronized media</li>
-                            <li>Public performance rights required for group viewing</li>
-                            <li>RVO INC disclaims all liability for copyright infringement</li>
-                            <li>We do not circumvent DRM or copy protection systems</li>
+                            <li>Legal copies required</li>
+                            <li>Group viewing rights needed</li>
+                            <li>No DRM bypass</li>
                         </ul>
 
-                        <h3>4. Prohibited Activities</h3>
-                        <p>The following activities are strictly prohibited and may result in immediate termination:</p>
+                        <h3>4. Don't Do This</h3>
                         <ul>
-                            <li>Reverse engineering synchronization protocol</li>
-                            <li>Attempting to bypass host controls</li>
-                            <li>Injecting malicious sync packets</li>
-                            <li>Synchronization of illegal or harmful content</li>
-                            <li>Commercial use without express written permission</li>
+                            <li>Reverse engineering</li>
+                            <li>Malicious packets</li>
+                            <li>Illegal content</li>
                         </ul>
 
-                        <h3>5. Account & Usage</h3>
-                        <p>DiscoCinema sessions are tied to Discord accounts. Abusive behavior may result in Discord reporting and session bans. We reserve the right to block problematic users.</p>
+                        <h3>5. No Warranty</h3>
+                        <p>Works "AS IS". Network issues? Your problem.</p>
 
-                        <h3>6. Disclaimers</h3>
-                        <p>DiscoCinema is provided "AS IS" without warranties. Network latency, player compatibility, and sync accuracy depend on your local environment and internet connection.</p>
+                        <h3>6. No Liability</h3>
+                        <p>No responsibility for your copyright issues.</p>
 
-                        <h3>7. Limitation of Liability</h3>
-                        <p>RVO INC shall not be liable for any indirect, incidental, or consequential damages arising from use of the service, including lost media, network costs, or legal claims from copyrighted material.</p>
-
-                        <h3>8. Termination</h3>
-                        <p>We reserve the right to suspend or terminate access at any time for violations of these terms or at our sole discretion.</p>
-
-                        <h3>9. Governing Law</h3>
-                        <p>These terms are governed by the laws of [Your Jurisdiction].</p>
-
-                        <h3>10. Changes</h3>
-                        <p>We may modify these terms. Continued use constitutes acceptance of changes.</p>
+                        <h3>7. Changes</h3>
+                        <p>We can change terms anytime.</p>
                     </div>
 
-                    <!-- Privacy Policy -->
                     <div id="privacy" class="legal-section">
-                        <div class="updated">Last Updated: January 2026</div>
+                        <div class="updated">Updated January 2026</div>
                         
                         <h2>Privacy Policy</h2>
                         
-                        <h3>1. Data Collection Philosophy</h3>
-                        <p>DiscoCinema prioritizes user privacy above all. **We collect zero personally identifiable information and zero media data.**</p>
+                        <h3>1. Nothing Collected</h3>
+                        <p>Zero PII. Zero media data. Zero files.</p>
 
-                        <h3>2. What We Don't Collect</h3>
+                        <h3>2. Sync Data Only</h3>
                         <ul>
-                            <li><strong>No video/audio files</strong> - Never uploaded, scanned, or processed</li>
-                            <li><strong>No filenames</strong> - We don't know what you're watching</li>
-                            <li><strong>No user data</strong> - No emails, names, or profiles stored</li>
-                            <li><strong>No chat history</strong> - Session chat is ephemeral</li>
-                            <li><strong>No analytics</strong> - No tracking pixels or behavioral data</li>
+                            <li>Discord ID (session only)</li>
+                            <li>Timestamp (live sync)</li>
+                            <li>Immediately discarded</li>
                         </ul>
 
-                        <h3>3. Sync Data (Ephemeral)</h3>
-                        <p>During active sessions only, we temporarily process:</p>
-                        <ul>
-                            <li>Discord User ID (party identification)</li>
-                            <li>Current timestamp (sync position)</li>
-                            <li>Playback state (play/pause/seeking)</li>
-                            <li>Room ID (session routing)</li>
-                        </ul>
-                        <p>This data exists only in RAM during your session and is discarded immediately after.</p>
+                        <h3>3. Local Only</h3>
+                        <p>Browser localStorage for UI prefs only.</p>
 
-                        <h3>4. Local Storage</h3>
-                        <p>Your browser may store:</p>
-                        <ul>
-                            <li>UI preferences (dark mode, etc.)</li>
-                            <li>Recent room IDs</li>
-                            <li>Local sync settings</li>
-                        </ul>
-                        <p>This data never leaves your device.</p>
+                        <h3>4. Discord Terms</h3>
+                        <p>Discord's privacy applies for accounts.</p>
 
-                        <h3>5. Third Parties</h3>
-                        <p>DiscoCinema operates within Discord infrastructure:</p>
-                        <ul>
-                            <li>Discord's Privacy Policy applies to user profiles</li>
-                            <li>Discord servers relay ephemeral sync packets</li>
-                            <li>No third-party trackers or services</li>
-                        </ul>
-
-                        <h3>6. Security</h3>
-                        <p>All sync communication uses:</p>
-                        <ul>
-                            <li>WSS (secure WebSocket)</li>
-                            <li>TLS 1.3 encryption</li>
-                            <li>Ephemeral-only data processing</li>
-                            <li>No persistent databases</li>
-                        </ul>
-
-                        <h3>7. Children</h3>
-                        <p>DiscoCinema is not directed to children under 13. Parents should supervise media consumption.</p>
-
-                        <h3>8. International Users</h3>
-                        <p>By using our service, you consent to data processing in accordance with Discord's global infrastructure.</p>
-
-                        <h3>9. Changes</h3>
-                        <p>Privacy policy updates will be announced in our Discord server.</p>
-
-                        <h3>10. Contact</h3>
-                        <p>Questions? Join our Discord: discord.gg/SJcdkaJXcf</p>
+                        <h3>5. No Tracking</h3>
+                        <p>No analytics, no pixels, no bullshit.</p>
                     </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Copy Helper -->
-    <textarea id="copy-helper" readonly aria-hidden="true" style="position: absolute; opacity: 0;"></textarea>
-
+    <textarea id="copy-helper" readonly style="opacity: 0; position: absolute;"></textarea>
+    
     <script src="js/discord-app.js"></script>
 </body>
 </html>

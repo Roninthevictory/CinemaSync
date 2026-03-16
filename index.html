@@ -2,530 +2,293 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>DiscoCinema</title>
-    
     <style>
-:root {
-            --blurple: #4f46e5; /* Royal Indigo */
-            --dark-bg: #0f0f12; /* Dark Charcoal */
+        :root {
+            --blurple: #5865F2;
+            --blurple-dark: #4752C4;
+            --dark-bg: #0f0f12;
             --glass-bg: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(99, 102, 241, 0.3); /* Medium Indigo */
-            --text-primary: #f3f4f6; /* Off-White */
-            --text-secondary: #d1d5db; /* Light Silver */
-            --success: #10B981;
-            --neon-purple: #9333ea; /* Bright Purple */
-            --gradient-text: linear-gradient(135deg, #f3f4f6 0%, #d8b4fe 50%, #a855f7 100%); /* Off-White → Pale Lavender → Vibrant Orchid */
-            --gradient-blurple: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #9333ea 100%); /* Royal Indigo → Medium Indigo → Bright Purple */
-            --scale-factor: 1;
-        }
-
-        /* Apply scaling */
-        .main-content {
-            transform-origin: top center;
-            transform: scale(var(--scale-factor));
+            --glass-border: rgba(99, 102, 241, 0.25);
+            --text-primary: #f3f4f6;
+            --text-secondary: #b5bac1;
+            --success: #23a55a;
+            --gradient-text: linear-gradient(135deg, #ffffff 0%, #d8b4fe 50%, #a855f7 100%);
+            --container-padding: 32px;
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        html, body {
-            height: 100vh !important;
-            width: 100vw !important;
-            max-width: 100% !important;
-            overflow: hidden !important;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: 'gg sans', 'Noto Sans', 'Helvetica Neue', Helvetica, Arial, sans-serif;
             color: var(--text-primary);
-            background: linear-gradient(135deg, rgba(88, 101, 242, 0.12) 0%, rgba(74, 82, 196, 0.08) 50%, rgba(20,20,30,0.4) 100%), 
-                        url('https://cdn.discordapp.com/attachments/1444689213638578288/1482018052181725204/Gemini_Generated_Image_d0rtzxd0rtzxd0rt_1.png?ex=69b56c5e&is=69b41ade&hm=1d2049e0aaffbefd184a15dd282549ff7dbd2d2945a3285125ec8e11eafb031f&') center/cover;
-            background-blend-mode: overlay;
-            background-attachment: scroll;
-            filter: brightness(1.05) contrast(1.15);
-            position: relative;
-            pointer-events: auto !important;
+            background: #000;
+            display: flex;
+            flex-direction: column;
         }
 
-        /* Nav Bar - Discord Activity Optimized */
-        .navbar {
+        .bg-layer {
             position: fixed;
-            top: 8px;
-            left: 12px;
-            right: 12px;
-            height: 56px;
-            background: var(--dark-bg);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(15, 15, 18, 0.98) 80%), 
+                        url('https://cdn.discordapp.com/attachments/1444689213638578288/1482018052181725204/Gemini_Generated_Image_d0rtzxd0rtzxd0rt_1.png') center/cover;
+            z-index: -1;
+        }
+
+        .navbar {
+            flex-shrink: 0;
+            height: 64px;
+            margin: 12px 16px 0;
+            background: rgba(15, 15, 18, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border: 1px solid var(--glass-border);
-            border-radius: 28px;
+            border-radius: 32px;
             display: flex;
             align-items: center;
-            padding: 0 16px;
-            z-index: 10000 !important;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
-            pointer-events: auto !important;
+            padding: 0 24px;
+            z-index: 1000;
         }
 
         .logo {
-            font-size: 1.3rem;
-            font-weight: 900;
+            font-size: 1.25rem;
+            font-weight: 800;
             background: var(--gradient-text);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -0.3px;
-            white-space: nowrap;
-            flex-shrink: 0;
+            letter-spacing: -0.5px;
         }
 
         .nav-tabs {
             flex: 1;
             display: flex;
-            gap: 12px;
+            gap: 8px;
             justify-content: flex-end;
-            margin-left: 16px;
         }
 
         .nav-tab {
-            padding: 8px 20px;
-            border-radius: 24px;
+            padding: 8px 16px;
+            border-radius: 20px;
             background: transparent;
             color: var(--text-secondary);
-            border: 1px solid transparent;
+            border: none;
             font-weight: 600;
-            font-size: 0.9rem;
-            cursor: pointer !important;
-            transition: all 0.25s ease;
-            pointer-events: auto !important;
-            position: relative;
-            z-index: 10001 !important;
-        }
-
-        .nav-tab:hover {
-            color: var(--text-primary);
-            background: rgba(241, 245, 249, 0.1); /* Cool Gray subtle */
-            border-color: var(--glass-border);
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
 
         .nav-tab.active {
-            background: var(--gradient-blurple);
-            color: #ffffff23 !important; /* White */
-            box-shadow: 0 4px 16px rgba(147, 51, 234, 0.5); /* Bright Purple shadow */
+            background: var(--blurple);
+            color: white;
         }
 
-        /* Perfect Discord Activity Layout */
         .main-content {
-            height: 100vh !important;
-            width: 100vw !important;
-            max-width: 100% !important;
-            padding: 72px 16px 12px !important;
+            flex: 1;
+            padding: 16px;
             display: flex;
             flex-direction: column;
-            gap: 20px;
             overflow: hidden;
-            position: relative;
-            z-index: 1;
-            pointer-events: auto !important;
+            align-items: center;
+            justify-content: center;
         }
 
         .view {
             display: none;
-            flex: 1;
-            flex-direction: column;
-            gap: 24px;
             width: 100%;
-            overflow: hidden;
+            max-width: 1000px;
+            height: 100%;
+            max-height: 100%;
         }
 
         .view.active {
             display: flex;
-            animation: fadeIn 0.4s ease;
+            flex-direction: column;
+            animation: fadeIn 0.3s ease-out;
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(16px); }
+            from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Single Column for Discord Activity */
         .glass-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(35px);
-            -webkit-backdrop-filter: blur(35px);
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
             border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            flex: 1;
-            padding: 20px;
+            border-radius: 24px;
+            padding: var(--container-padding);
             display: flex;
             flex-direction: column;
-            gap: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-            position: relative;
-            pointer-events: auto !important;
+            gap: 20px;
+            overflow-y: auto;
         }
 
-        /* Status Badge */
-        .status-badge {
-            align-self: center;
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-            padding: 8px 24px;
-            border-radius: 50px;
-            font-size: 0.85rem;
-            font-weight: 800;
-            letter-spacing: 1.5px;
-            text-transform: uppercase;
-            border: 1px solid rgba(16, 185, 129, 0.4);
-            display: inline-flex;
+        /* Hero Layout - Features next to info */
+        .hero-layout {
+            display: flex;
+            gap: 32px;
             align-items: center;
-            gap: 8px;
+            justify-content: center;
+            flex-wrap: wrap; /* Stack on mobile */
         }
 
-        .status-badge::before {
-            content: '🔥';
+        .hero-info {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
         }
 
-        /* Hero Section */
-        .hero-section {
-            text-align: center;
-            flex-shrink: 0;
+        .features-column {
+            flex: 1;
+            min-width: 300px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .status-badge {
+            align-self: flex-start;
+            background: rgba(35, 165, 90, 0.1);
+            color: var(--success);
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            border: 1px solid rgba(35, 165, 90, 0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         h1 {
-            font-size: clamp(1.8rem, 6vw, 2.6rem);
-            font-weight: 900;
-            line-height: 1.1;
-            margin-bottom: 12px;
-            letter-spacing: -0.6px;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            font-weight: 800;
             background: var(--gradient-text);
             -webkit-background-clip: text;
-            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
         }
 
         .body-text {
             color: var(--text-secondary);
-            font-size: clamp(0.95rem, 3.5vw, 1.1rem);
-            line-height: 1.55;
-            max-width: 480px;
-            margin: 0 auto;
-            text-align: center;
+            line-height: 1.4;
+            font-size: 1rem;
         }
 
-        /* Discord CTA */
         .discord-cta {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .discord-btn, .legal-btn {
-            display: flex;
-            align-items: center;
             gap: 12px;
-            padding: 14px 28px;
-            background: var(--gradient-blurple);
-            color: white !important;
-            border: none;
-            border-radius: 24px;
-            font-size: 1rem;
-            font-weight: 600;
-            cursor: pointer !important;
-            transition: all 0.3s ease;
-            box-shadow: 0 8px 25px rgba(139, 92, 246, 0.4);
-            text-decoration: none !important;
-            pointer-events: auto !important;
-            white-space: nowrap;
+            margin-top: 8px;
         }
 
-        .discord-btn:hover, .legal-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.6);
+        .discord-btn {
+            background: var(--blurple);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 24px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.95rem;
+            width: fit-content;
+            transition: background 0.2s;
         }
 
         .copy-box {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(88,101,242,0.3);
-            border-radius: 20px;
-            padding: 16px 20px;
-            cursor: pointer !important;
-            transition: all 0.3s ease;
-            pointer-events: auto !important;
-            max-width: 300px;
-            width: 100%;
-        }
-
-        .copy-box:hover {
-            background: rgba(139, 92, 246, 0.2);
-            border-color: var(--neon-purple);
-            transform: translateY(-1px);
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 10px 16px;
+            width: fit-content;
+            min-width: 240px;
+            cursor: pointer;
         }
 
         .copy-text {
-            font-family: 'SF Mono', monospace;
-            background: rgba(0,0,0,0.6);
-            padding: 10px 16px;
-            border-radius: 12px;
-            font-size: 0.95rem;
+            font-family: monospace;
             color: var(--blurple);
-            text-align: center;
-            word-break: break-all;
-            margin-bottom: 8px;
+            font-size: 0.85rem;
+            margin-bottom: 2px;
         }
 
         .copy-status {
-            font-size: 0.8rem;
-            font-weight: 700;
-            text-align: center;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            opacity: 0.9;
-            color: var(--neon-purple);
-        }
-
-        /* Features */
-        .features-section {
-            flex: 1;
-            overflow-y: auto;
-            padding-right: 12px;
-        }
-
-        .features-grid {
-            display: flex;
-            flex-direction: column;
-            gap: 16px;
-            max-height: 100%;
+            font-size: 0.65rem;
+            font-weight: 800;
+            color: var(--text-secondary);
         }
 
         .feature {
+            background: rgba(255,255,255,0.03);
+            padding: 18px;
+            border-radius: 18px;
+            border: 1px solid rgba(255,255,255,0.05);
             display: flex;
             gap: 16px;
-            align-items: flex-start;
-            padding: 16px;
-            border-radius: 16px;
-            background: rgba(255,255,255,0.04);
-            border: 1px solid rgba(255,255,255,0.08);
-            transition: all 0.3s ease;
-            cursor: default;
+            transition: background 0.2s;
         }
 
-        .feature:hover {
-            background: rgba(255,255,255,0.08);
-            border-color: rgba(255,255,255,0.12);
-        }
-
-        .feature-icon {
-            width: 44px;
-            height: 44px;
-            background: rgba(88,101,242,0.6);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-            flex-shrink: 0;
-            box-shadow: 0 4px 16px rgba(88,101,242,0.3);
-        }
-
-        .feature-content h3 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            margin-bottom: 4px;
-            color: var(--text-primary);
-        }
-
-        .feature-content p {
-            color: var(--text-secondary);
-            line-height: 1.5;
-            font-size: 0.9rem;
-        }
-
-        /* Legal Tab */
-        .legal-container {
-            padding: 20px;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            overflow: hidden;
-        }
-
-        .legal-left, .features-right {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        @media (max-width: 768px) {
-            .legal-container {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .legal-tabs {
-            display: flex;
-            gap: 12px;
-            background: var(--dark-bg);
-            backdrop-filter: blur(25px);
-            padding: 8px 16px;
-            border-radius: 24px;
-            border: 1px solid var(--glass-border);
-            align-self: center;
-            flex-shrink: 0;
-        }
-
-        .legal-tab {
-            flex: 1;
-            padding: 12px 0;
-            border-radius: 20px;
-            cursor: pointer !important;
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: var(--text-secondary);
-            transition: all 0.25s ease;
-            border: 1px solid transparent;
-            text-align: center;
-            pointer-events: auto !important;
-        }
-
-        .legal-tab.active {
-            background: var(--blurple);
-            color: white !important;
-            border-color: var(--blurple);
-        }
-
-        .legal-content {
-            flex: 1 !important;
-            overflow-y: auto !important;
-            padding-right: 16px;
-            scrollbar-width: thin;
-            scrollbar-color: rgba(255,255,255,0.3) transparent;
-            pointer-events: auto !important;
-        }
-
-        .legal-content::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .legal-content::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .legal-content::-webkit-scrollbar-thumb {
-            background: rgba(255,255,255,0.3);
-            border-radius: 6px;
-        }
-
-        .legal-section {
-            display: none;
-            line-height: 1.7;
-            animation: fadeIn 0.3s ease;
-            padding-bottom: 20px;
-        }
-
-        .legal-section.active {
-            display: block;
-        }
-
-        .legal-section h2 {
-            font-size: clamp(1.8rem, 7vw, 2.5rem);
-            font-weight: 800;
-            margin-bottom: 24px;
-            text-align: center;
-            position: relative;
-            letter-spacing: -0.5px;
-        }
-
-        .legal-section h2::after {
-            content: '';
-            position: absolute;
-            bottom: -12px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 60px;
-            height: 3px;
-            background: var(--blurple);
-            border-radius: 2px;
-        }
-
-        .legal-section h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 32px 0 16px 0;
-            padding-bottom: 8px;
-            border-bottom: 1px solid var(--glass-border);
-        }
-
-        .legal-section p, .legal-section li {
-            font-size: 1rem;
-            color: var(--text-secondary);
-            margin-bottom: 20px;
-            line-height: 1.65;
-        }
-
-        .legal-section ul {
-            padding-left: 28px;
-            margin-bottom: 20px;
-        }
-
-        .updated {
-            font-size: 0.85rem;
-            color: var(--text-secondary);
-            text-align: center;
-            margin-bottom: 32px;
-            font-style: italic;
-            opacity: 0.8;
-        }
+        .feature-icon { font-size: 1.5rem; flex-shrink: 0; }
+        .feature-content h3 { font-size: 1rem; margin-bottom: 4px; }
+        .feature-content p { font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4; }
 
         .footer {
             text-align: center;
-            padding-top: 24px;
-            border-top: 1px solid var(--glass-border);
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: var(--text-secondary);
-            opacity: 0.7;
-            flex-shrink: 0;
+            padding-top: 16px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            margin-top: auto;
         }
 
-        /* Ultra Tight Discord Activity Responsive */
-        @media (max-height: 620px) {
-            .navbar { height: 52px; top: 6px; padding: 0 12px; border-radius: 24px; }
-            .main-content { padding: 66px 12px 8px !important; gap: 16px !important; }
-            .glass-container { padding: 16px !important; gap: 20px !important; border-radius: 16px; }
-            h1 { font-size: clamp(1.6rem, 5.5vw, 2.3rem) !important; margin-bottom: 8px !important; }
-            .body-text { font-size: clamp(0.85rem, 3.2vw, 1rem) !important; }
-            .features-grid { gap: 12px !important; }
-            .feature { padding: 12px !important; gap: 12px !important; }
-            .feature-icon { width: 40px; height: 40px; font-size: 1.2rem; }
-            .feature-content h3 { font-size: 1rem !important; margin-bottom: 2px !important; }
-            .feature-content p { font-size: 0.85rem !important; line-height: 1.4 !important; }
-            .footer { padding-top: 16px !important; font-size: 0.75rem !important; }
+        /* Legal Tabs */
+        .legal-tabs {
+            display: flex;
+            gap: 4px;
+            background: rgba(0,0,0,0.2);
+            padding: 4px;
+            border-radius: 12px;
+            align-self: center;
         }
 
-        @media (max-width: 400px) {
-            .nav-tabs { gap: 8px; }
-            .nav-tab { padding: 6px 16px; font-size: 0.85rem; }
-            .glass-container { padding: 16px; border-radius: 16px; }
+        .legal-subtab { padding: 6px 12px; font-size: 0.8rem; }
+        .legal-section { display: none; text-align: center; }
+        .legal-section.active { display: block; }
+        
+        @media (max-width: 768px) {
+            .hero-layout { gap: 16px; }
+            h1 { text-align: center; }
+            .body-text { text-align: center; }
+            .status-badge { align-self: center; }
+            .discord-cta { align-items: center; }
+            .discord-btn { width: 100%; text-align: center; }
+            .copy-box { width: 100%; text-align: center; }
+            .glass-container { padding: 20px; }
         }
 
-        /* Fix Discord iframe pointer events */
-        button, .nav-tab, .copy-box, .legal-tab {
-            pointer-events: auto !important;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        .legal-content, .features-section {
-            -webkit-overflow-scrolling: touch;
-        }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--glass-border); border-radius: 10px; }
     </style>
 </head>
 <body>
+    <div class="bg-layer"></div>
+
     <nav class="navbar">
         <div class="logo">Disco<span>Cinema</span></div>
         <div class="nav-tabs">
@@ -538,112 +301,98 @@
         <!-- Home View -->
         <section id="home" class="view active">
             <div class="glass-container">
-                <div class="status-badge">Coming Soon</div>
-                <h1>DiscoCinema</h1>
-                <p class="body-text">Perfect movie sync for Discord. Your files stay local, privacy guaranteed.</p>
-                
-                <div class="discord-cta">
-                    <a href="https://discord.gg/SJcdkaJXcf" target="_blank" class="discord-btn">
-                        Join Discord
-                    </a>
-                    <div id="discord-copy" class="copy-box" role="button" tabindex="0" aria-label="Copy Discord invite">
-                        <div class="copy-text">discord.gg/SJcdkaJXcf</div>
-                        <div class="copy-status" id="copy-status">Click to copy</div>
+                <div class="hero-layout">
+                    <!-- Left Column: Info -->
+                    <div class="hero-info">
+                        <div class="status-badge"><span>●</span> LIVE SYNC</div>
+                        <h1>The Ultimate Theater Experience</h1>
+                        <p class="body-text">DiscoCinema brings frame-perfect movie nights to your Discord server. Zero latency, proprietary sync, and total privacy.</p>
+                        
+                        <div class="discord-cta">
+                            <a href="https://discord.gg/SJcdkaJXcf" target="_blank" class="discord-btn">Join Community</a>
+                            <div id="discord-copy" class="copy-box">
+                                <div class="copy-text">discord.gg/SJcdkaJXcf</div>
+                                <div class="copy-status" id="copy-status">CLICK TO COPY LINK</div>
+                            </div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="features-section">
-                    <div class="features-grid">
+                    <!-- Right Column: Features -->
+                    <div class="features-column">
                         <div class="feature">
                             <div class="feature-icon">⚡</div>
                             <div class="feature-content">
-                                <h3>Frame Perfect</h3>
-                                <p>Binary sync protocol - zero drift, perfect alignment.</p>
+                                <h3>Binary Sync</h3>
+                                <p>Frame-perfect playback for everyone in the call, regardless of connection.</p>
                             </div>
                         </div>
                         <div class="feature">
-                            <div class="feature-icon">👑</div>
+                            <div class="feature-icon">🛡️</div>
+                            <div class="feature-content">
+                                <h3>Privacy First</h3>
+                                <p>No logs, no tracking. Your files never leave your local environment.</p>
+                            </div>
+                        </div>
+                        <div class="feature">
+                            <div class="feature-icon">🎬</div>
                             <div class="feature-content">
                                 <h3>Host Controls</h3>
-                                <p>Full playback authority with participant management.</p>
-                            </div>
-                        </div>
-                        <div class="feature">
-                            <div class="feature-icon">💬</div>
-                            <div class="feature-content">
-                                <h3>Live Chat</h3>
-                                <p>Stay connected without leaving the theater.</p>
-                            </div>
-                        </div>
-                        <div class="feature">
-                            <div class="feature-icon">🔒</div>
-                            <div class="feature-content">
-                                <h3>Private</h3>
-                                <p>No cloud, no tracking. Your data stays yours.</p>
+                                <p>Advanced permissions for seeking, volume, and playback management.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="footer">© 2026 RVO INC</div>
+                <div class="footer">© 2026 RVO INC • V1.0.4</div>
             </div>
         </section>
 
         <!-- Legal View -->
         <section id="legal" class="view">
-            <div class="glass-container legal-container">
-                <div class="legal-left">
-                    <div class="legal-tabs">
-                        <button class="legal-tab active" data-legal="legal-docs">Legal</button>
-                        <button class="legal-tab" data-legal="dmca">DMCA</button>
-                    </div>
-                    
-                    <div class="legal-content">
-                        <div id="legal-docs" class="legal-section active">
-                            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; text-align: center;">
-                                <h2 style="margin-bottom: 24px;">Legal Documents</h2>
-                                
-                                <div style="text-align: center; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
-                                    📄 Terms of Service
-                                </div>
-                                <div id="tos-copy" class="copy-box legal-copy-box" role="button" tabindex="0" aria-label="Copy ToS link">
-                                    <div class="copy-text">sites.google.com/view/discocinema/terms</div>
-                                    <div class="copy-status" id="tos-copy-status">Click to copy</div>
-                                </div>
-                                
-                                <div style="text-align: center; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
-                                    🔒 Privacy Policy
-                                </div>
-                                <div id="privacy-copy" class="copy-box legal-copy-box" role="button" tabindex="0" aria-label="Copy Privacy link">
-                                    <div class="copy-text">sites.google.com/view/discocinema/privacy</div>
-                                    <div class="copy-status" id="privacy-copy-status">Click to copy</div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div id="dmca" class="legal-section">
-                            <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 24px; text-align: center;">
-                                <h2 style="margin-bottom: 24px;">DMCA Takedown Requests</h2>
-                                
-                                <div style="text-align: center; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
-                                    ⚖️ DMCA Report
-                                </div>
-                                <div id="dmca-copy" class="copy-box legal-copy-box" role="button" tabindex="0" aria-label="Copy DMCA link" style="border-color: rgba(255, 107, 107, 0.5);">
-                                    <div class="copy-text">sites.google.com/view/discocinema/dmca</div>
-                                    <div class="copy-status" id="dmca-copy-status">Click to copy</div>
-                                </div>
-                                <p style="color: var(--text-secondary); font-size: 0.9rem; max-width: 400px;">
-                                    For copyright infringement reports and takedown requests.
-                                </p>
-                            </div>
+            <div class="glass-container">
+                <div class="legal-tabs">
+                    <button class="nav-tab active legal-subtab" data-legal="tos">Terms</button>
+                    <button class="nav-tab legal-subtab" data-legal="privacy">Privacy</button>
+                    <button class="nav-tab legal-subtab" data-legal="dmca">DMCA</button>
+                </div>
+                
+                <div id="tos" class="legal-section active">
+                    <h2 style="margin: 15px 0 10px;">Terms of Service</h2>
+                    <p class="body-text" style="margin-bottom: 20px;">Review our usage guidelines and user agreement.</p>
+                    <div class="discord-cta" style="align-items: center;">
+                        <div id="tos-copy" class="copy-box">
+                            <div class="copy-text">discocinema/terms</div>
+                            <div class="copy-status" id="tos-copy-status">COPY LINK</div>
                         </div>
                     </div>
                 </div>
+
+                <div id="privacy" class="legal-section">
+                    <h2 style="margin: 15px 0 10px;">Privacy Policy</h2>
+                    <p class="body-text" style="margin-bottom: 20px;">Learn how we protect your data and privacy.</p>
+                    <div class="discord-cta" style="align-items: center;">
+                        <div id="privacy-copy" class="copy-box">
+                            <div class="copy-text">discocinema/privacy</div>
+                            <div class="copy-status" id="privacy-copy-status">COPY LINK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="dmca" class="legal-section">
+                    <h2 style="margin: 15px 0 10px;">DMCA</h2>
+                    <p class="body-text" style="margin-bottom: 20px;">Intellectual property and takedown procedures.</p>
+                    <div class="discord-cta" style="align-items: center;">
+                        <div id="dmca-copy" class="copy-box">
+                            <div class="copy-text">discocinema/dmca</div>
+                            <div class="copy-status" id="dmca-copy-status">COPY LINK</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer">Managed by RVO INC Legal</div>
             </div>
         </section>
     </main>
-
-    <textarea id="copy-helper" readonly style="opacity: 0; position: absolute;"></textarea>
     
     <script src="js/discord-app.js"></script>
 </body>

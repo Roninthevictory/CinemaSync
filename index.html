@@ -18,13 +18,22 @@
             --container-padding: 32px;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.nav-tab, .legal-subtab, .copy-box, .copy-text {
+    user-select: none;
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.copy-text {
+    user-select: text;
+}
 
         body {
             height: 100vh;
@@ -44,7 +53,7 @@
             width: 100%;
             height: 100%;
             background: linear-gradient(135deg, rgba(88, 101, 242, 0.1) 0%, rgba(15, 15, 18, 0.98) 80%), 
-                        url('https://cdn.discordapp.com/attachments/1482334157039206430/1483327431757791332/Gemini_Generated_Image_x9r8slx9r8slx9r8_1.png?ex=69ba2fd2&is=69b8de52&hm=c670f972c93b2dd47855be179b6ce1215f99f41edfb2b12edab170b79200f7f7&') center/cover;
+                        url('https://cdn.discordapp.com/attachments/1444689213638578288/1482018052181725204/Gemini_Generated_Image_d0rtzxd0rtzxd0rt_1.png') center/cover;
             z-index: -1;
         }
 
@@ -233,6 +242,11 @@
             color: var(--blurple);
             font-size: 0.85rem;
             margin-bottom: 2px;
+            word-break: break-all;
+        }
+
+        .nav-tab, .legal-subtab {
+            cursor: pointer !important;
         }
 
         .copy-status {
@@ -323,10 +337,10 @@
                         
                         <div class="discord-cta">
                             <a href="https://discord.gg/SJcdkaJXcf" target="_blank" class="discord-btn">Join Community</a>
-                            <div id="discord-copy" class="copy-box">
-                                <div class="copy-text">discord.gg/SJcdkaJXcf</div>
-                                <div class="copy-status" id="copy-status">CLICK TO COPY LINK</div>
-                            </div>
+                        <div id="discord-copy" class="copy-box">
+                            <div class="copy-text">discord.gg/SJcdkaJXcf</div>
+                            <div class="copy-status" id="copy-status">CLICK TO SELECT</div>
+                        </div>
                         </div>
                     </div>
 

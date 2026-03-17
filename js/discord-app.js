@@ -68,53 +68,25 @@ function handleLegalSwitch(legalId, triggerEl) {
 /**
  * Clipboard handling with robust fallback
  */
-async function copyToClipboard(text, statusEl) {
-    if (!statusEl) return;
-    
-    const fallbackCopy = (str) => {
-        const el = document.createElement('textarea');
-        el.value = str;
-        el.style.position = 'fixed';
-        el.style.left = '-9999px';
-        el.style.opacity = '0';
-        el.setAttribute('readonly', '');
-        document.body.appendChild(el);
-        const wasSelectable = document.body.style.userSelect;
-        document.body.style.userSelect = 'text';
-        el.focus();
-        el.select();
-        const ok = document.execCommand('copy');
-        document.body.removeChild(el);
-        document.body.style.userSelect = wasSelectable;
-        return ok;
-    };
+function selectAndCopy(text, statusEl, copyTextEl) {
+    if (!statusEl || !copyTextEl) return;
 
-    try {
-        let success = false;
-        if (navigator.clipboard?.writeText) {
-            await navigator.clipboard.writeText(text);
-            success = true;
-        } else {
-            success = fallbackCopy(text);
-        }
-        
-        const oldText = statusEl.textContent;
-        statusEl.textContent = 'COPIED!';
-        statusEl.style.color = 'var(--success)';
-        setTimeout(() => {
-            statusEl.textContent = oldText;
-            statusEl.style.color = '';
-        }, 1500);
-        return success;
-    } catch (e) {
-        console.error('Copy failed:', e);
-        statusEl.textContent = 'FAILED';
-        statusEl.style.color = '#ef4444';
-        setTimeout(() => {
-            statusEl.textContent = 'CLICK TO COPY';
-            statusEl.style.color = '';
-        }, 1500);
-    }
+    // For iframe/Discord: select the displayed text for manual copy
+    const range = document.createRange();
+    range.selectNodeContents(copyTextEl);
+    const selection = window.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    const oldText = statusEl.textContent;
+    statusEl.textContent = 'SELECTED! Ctrl+C';
+    statusEl.style.color = 'var(--success)';
+    
+    setTimeout(() => {
+        selection.removeAllRanges();
+        statusEl.textContent = oldText;
+        statusEl.style.color = '';
+    }, 3000);
 }
 
 /**
@@ -149,6 +121,7 @@ document.addEventListener('click', async (e) => {
         const statusEl = copyBox.querySelector('.copy-status');
         if (!statusEl) return;
         
+        const copyTextEl = copyBox.querySelector('.copy-text');
         const id = copyBox.id;
         let text = '';
         if (id === 'discord-copy') text = CONFIG.INVITE;
@@ -157,8 +130,8 @@ document.addEventListener('click', async (e) => {
         else if (id === 'dmca-copy') text = CONFIG.DMCA;
         
         if (text) {
-            console.log('Copying:', text);
-            await copyToClipboard(text, statusEl);
+            console.log('Selecting for copy:', text);
+            selectAndCopy(text, statusEl, copyTextEl);
         }
     }
 });
